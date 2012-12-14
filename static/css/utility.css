@@ -1,0 +1,9 @@
+.hide {
+	display: none;
+}
+.fade {
+	visibility: hidden;
+}
+.show {
+	visibility: visible;
+}
