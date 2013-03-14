@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sqlite3
-from flask import Flask, g, render_template, Response, json
-# from flask import abort, redirect, flash, url_for, jsonify, request, session, socket
+
+from flask import Flask, g, render_template, Response, json, request, session, escape, redirect, url_for
+
 from contextlib import closing
 from time import ctime
 import pickle
@@ -11,6 +12,8 @@ from examples import get_Examples
 
 import HLIParser
 from query import checkIfallStar, similar_query_split, getSearchResults_Inside, query_extend
+
+import user, json, urllib
 
 DATABASE = 'linggle.db3'
 DEBUG = True
@@ -68,14 +71,19 @@ def examples(ngram):
 
 @app.route('/query/<query>')
 def query(query):
+
+    # Maxis # 架構
+    # Maxis # 要把 router / controller 分開, 不然這個 linggle.py 太大!!!
+    # Maxis #
+
     query_in = query
+    user.querylog(urllib.unquote(query), session['uid'])
+
     # query_in = request.GET.get('query')
     logger.debug('=' * 20)
     logger.debug('get the request: ' + str(query_in))
 
-    # print '=' * 20
-    # print "get the request", ctime()
-    # print "ori = ", query_in
+    # Maxis # 應該改成 urllib.unquote() 就好 ?!
 
     query_in = " ".join(query_in.replace("%20", " ").split())
 
