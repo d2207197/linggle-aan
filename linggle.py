@@ -201,33 +201,82 @@ def login_controller():
     ## POST, run login process
     if request.method == 'POST':
 
-        loginResult = user.login(request)
+        print '# POST login request'
+        print '> current SESSION', session
+
+
+        try:
+            loginResult = user.login(request)
+            print '> Login successed.'
+        except:
+            print '[error] login server failed, request:',request
+        
+        print '> Result:', loginResult
+        
 
         if loginResult['type'] == 'success': # Login Successfully
 
-            # store info in SESSION
-            session['username'] = request.form['username']
-            session['activation'] = user.getAcvtivation(request)
+            print '> Storing data into SESSION...'
 
-            session['uid'] = loginResult['uid']
-            session['utype'] = request.form['utype']
-            # session['uid'] = user.get_uid()
-            # session['utype'] = user.get_utype()
+            try:
+                session['username'] = request.form['username']
+            except:
+                print '[error] session[username]'
+            try:                
+                session['activation'] = user.getAcvtivation(request)
+            except:
+                print '[error] session[activation]'
+            try:
+                session['uid'] = loginResult['uid']
+            except:
+                print '[error] session[uid]'
+            try:
+                session['utype'] = request.form['utype']
+            except:
+                print '[error] session[utype]'
+
         else:
-            pass
+            print '> Login failed.'
+            print '> Result:', loginResult
+            # pass
 
     ## GET, return login status
     else:
 
         # user.info(session['username'], request.form['utype'])
 
-        if 'username' in session:
-            loginResult['type'] = 'login'
-            loginResult['msg'] = 'Logged in as %s' % escape(session['username'])
-            loginResult['user'] = session['username']
+        print '# GET login request'
+        print '> current SESSION', session
 
-            loginResult['uid'] = session['uid']
-            loginResult['utype'] = session['utype']
+
+        if 'username' in session:
+            try:
+                loginResult['type'] = 'login'
+            except:
+                print '[error] loginResult[type] error'
+
+            try:
+                loginResult['msg'] = 'Logged in as %s' % escape(session['username'])
+            except:
+                print '[error] loginResult[msg]'
+                print '> current SESSION', session
+
+            try:
+                loginResult['user'] = session['username']
+            except:
+                print '[error] loginResult[user]'
+                print '> current SESSION', session
+
+            try:
+                loginResult['uid'] = session['uid']
+            except:            
+                print '[error] loginResult[uid]'
+                print '> current SESSION', session
+            try:
+                loginResult['utype'] = session['utype']
+            except:
+                print '[error] loginResult[utype]'
+                print '> current SESSION', session
         else:
             loginResult['type'] = 'not_login'
             loginResult['msg'] = 'You are not logged in.'
