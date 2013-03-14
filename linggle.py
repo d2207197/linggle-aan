@@ -177,6 +177,94 @@ def query(query):
         json.dumps(Return_Result), status=200, mimetype='application/json')
     return resp
 
+@app.route('/logout', methods=['GET', 'POST'])
+def logout_controller():
+
+    result = {'logout':False}
+
+    if 'username' in session:
+        current_username = escape(session['username'])
+        # print 'BEFORE\tsession[username]:',[session['username']]
+        session.pop('username', current_username)
+        # print 'AFTER\tsession[username]:',[session['username']]
+        result['logout'] = True
+    else:
+        result['logout'] = False
+
+    resp = Response(json.dumps(result) , status=200, mimetype='application/json')
+    return resp
+
+@app.route('/login', methods=['GET', 'POST'])
+def login_controller():
+    loginResult = {}
+
+    ## POST, run login process
+    if request.method == 'POST':
+
+        loginResult = user.login(request)
+
+        if loginResult['type'] == 'success': # Login Successfully
+
+            # store info in SESSION
+            session['username'] = request.form['username']
+            session['activation'] = user.getAcvtivation(request)
+
+            session['uid'] = loginResult['uid']
+            session['utype'] = request.form['utype']
+            # session['uid'] = user.get_uid()
+            # session['utype'] = user.get_utype()
+        else:
+            pass
+
+    ## GET, return login status
+    else:
+
+        # user.info(session['username'], request.form['utype'])
+
+        if 'username' in session:
+            loginResult['type'] = 'login'
+            loginResult['msg'] = 'Logged in as %s' % escape(session['username'])
+            loginResult['user'] = session['username']
+
+            loginResult['uid'] = session['uid']
+            loginResult['utype'] = session['utype']
+        else:
+            loginResult['type'] = 'not_login'
+            loginResult['msg'] = 'You are not logged in.'
+
+    resp = Response( json.dumps(loginResult), status=200, mimetype='application/json')
+    return resp
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup_controller():
+    result = {}
+    ## POST, run signup process
+    if request.method == 'POST':
+        result = user.signup(request)
+        if result['type'] == 'success': # signup Successfully
+            
+            # store info in SESSION, set default activation as 0
+            session['username'] = request.form['username']
+            session['activation'] = 0
+
+            # wait for activation (using GET method on /signup program )
+
+        else: # signup failed
+            pass
+        return Response( json.dumps(result), status=200, mimetype='application/json')
+    ## GET: signup activation
+    else:
+        # user activation
+        user.active(request)
+
+        # get username & activation status
+        result = user.getUserInfoByID(request)
+
+        # store info in SESSION
+        session['username'] = result['username']
+        session['activation'] = result['activation']
+
+        return redirect(url_for('homepage'))
 
 if __name__ == '__main__':
     import argparse
