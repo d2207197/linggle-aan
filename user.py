@@ -100,7 +100,7 @@ class User(object):
         if add_success:
             if self.utype == 'email':
 
-                url = 'http://127.0.0.1:5000/signup?u='+str(uid)+'&'+'c='+str(ActivationCode)
+                url = 'http://linggle.com/signup?u='+str(uid)+'&'+'c='+str(ActivationCode)
 
                 html = '<html>'
                 html += '<head></head>'
