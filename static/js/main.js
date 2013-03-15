@@ -50,8 +50,6 @@ function init() // a page load (ajax)
 	layout();						// set layout
 	exampleHandler(EXAMPLE_STATE);	// example show/hide
 
-	UserEvents();
-
 	// console.log(test());
 }
 function adjustBrowser()
