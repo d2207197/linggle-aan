@@ -128,8 +128,7 @@ function showUserPanel()
 
 function hideUserPanel()
 {
-    $('#login-container').delay(1000).slideUp(500, function(){
-        // .delay(800).fadeIn(400);
+    $('#login-container').slideUp(500, function(){
         $('#login-mask').fadeOut(200);
     });
     
@@ -250,8 +249,6 @@ function UserEventHandler()
 
 function _changeTextByUserStatus()
 {
-    console.log(_LOGIN);
-
     if(_LOGIN)
     {
         $('#show-greeting-text').show(0);
