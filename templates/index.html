@@ -19,7 +19,6 @@
 	<!-- CSS -->
 	<link type="text/css" rel="stylesheet" href="static/css/main.css" />
 	<link type="text/css" rel="stylesheet" href="static/css/utility.css" />
-	<link type="text/css" rel="stylesheet" href="static/css/user.css" />
 
 	<!-- jQuery -->
 	<script type="text/javascript" src="static/js/jquery.js"></script>
@@ -27,7 +26,6 @@
 	<script type="text/javascript" src="static/js/data.js"></script>
 	<script type="text/javascript" src="static/js/utility.js"></script>
 	<script type="text/javascript" src="static/js/layout.js"></script>
-	<script type="text/javascript" src="static/js/user.js"></script>
     <script type="text/javascript" src="static/js/main.js"></script>
 
     <link rel="shortcut icon" href="static/img/favicon.png" />
@@ -36,82 +34,7 @@
 <body class="body">
 {% include "google-analytics.html" %}
 
-	<div id="login-container" class="hide">
-
-		<!-- <span id="user-title" class="win8-font">Login</span> -->
-		<div id="login-logo-container">
-			<img class="for-login" src="static/img/Login.png" height="48"/>
-			<img class="for-signup" src="static/img/signup.png" height="48"/>
-		</div>
-		<!-- <span id="signup-title">Login</span> -->
-
-		<div id="login-wrap">
-
-			<table id="login-table" cellpadding="0" cellspacing="0">
-				<tr class="for-login for-signup">
-					<td class="login-field-text">
-						<span class="M-font">Email</span>
-					</td>
-					<td class="M-input-container">
-						<input id="login-email" class="M-input M-font" type="text" />
-					</td>
-				</tr>
-				<tr class="for-login for-signup">
-					<td class="login-field-text">
-						<span class="M-font">Password</span>
-					</td>
-					<td class="M-input-container">
-						<input id="login-password" class="M-input M-font" type="password" />
-					</td>
-				</tr>
-				<tr class="">
-					<td class="login-field-text">
-						<span class="M-font for-signup">Password Again</span>
-					</td>
-					<td class="M-input-container">
-						<input id="login-confirmpassword" class="M-input M-font for-signup" type="password" />
-					</td>
-				</tr>
-				<tr>
-					<td class="login-field-text">
-					</td>
-					<td class="M-input-container">
-						<button id="login-btn" class="M-button for-login">Login</button>
-						<button id="signup-btn" class="M-button for-signup">Join Linggle</button>
-					</td>
-				</tr>
-				<tr>
-					<td class="login-field-text">
-					</td>
-					<td id="signup-or-login" class="M-font" >
-						<div id="signup-linker" class="for-login">
-							<span>First time Linggle?</span>
-							<span class="underline-hover">Signup</span>
-						</div>
-						<div id="login-linker" class="for-signup">
-							<span>Already a Linggler?</span>
-							<span class="underline-hover">Login</span>
-						</div>
-					</td>
-				</tr>
-			</table>
-		</div>
-
-		<div id="login-msg" class="M-font"></div>
-	</div>
-	<div id="login-mask" class="hide"></div>
-
-
 	<div id="container">
-
-		<div id="control-panel-container">
-			<div id="login-link" class="M-font">
-				<span id="show-login-text" class="hide">Login</span>
-				<span id="show-greeting-text" class="hide" >Hi, Linggler!</span>
-				<span id="show-logout-text" class="hide" >(Logout)</span>
-			</div>
-		</div>
-
 		<div id="help-mask" class="hide"></div>
 		<div id="help-container" class="hide">
 			<table cellspacing="0" cellpadding="0"></table>
@@ -161,9 +84,6 @@
 		</div>
 		<div id="content-mask"></div>
 		<div></div>
-
-		
-		
 	</div>
 </body>
 
