@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from time import ctime
-import socket
+import socket,sqlite3
 
 def checkIfallStar(query_in):
     # check whether the query would be transformed into all star
@@ -26,17 +26,16 @@ def checkIfallStar(query_in):
         return False
 
 
-def getParaphrase(word, pos=""):
-    # get paraphrase candidate from Patric Pantel database
+def getParaphrase(word, pos = ""):
+    ##get paraphrase candidate from Patric Pantel database
     Score_T = 0.05
-    conn = sqlite3.connect("LinggleII/Data/PatricPantel.db3")
+    conn = sqlite3.connect("databases/PatricPantel.db3")
     cursor = conn.cursor()
     if len(pos) == 0:
-        SQL = "select SimWord from PatricPantel where head =='%s' and score > %f order by score desc" % (word, Score_T)
-        candidates = [word] + [data[0].lower(
-        ) for data in cursor.execute(SQL).fetchall()]
+        SQL = "select SimWord,score from PatricPantel where head =='%s' and score > %f order by score desc" % (word,Score_T)
+        candidates = [(word,1.0)] + [(data[0].lower(),data[1]) for data in cursor.execute(SQL).fetchall()]
         conn.close()
-        return candidates
+    return candidates
 
 
 def getRotateNgramResults(query):
@@ -66,33 +65,41 @@ def getRotateNgramResults(query):
 def getSearchResults_Inside(query_in):
     print "prepare to submit query"
     Search_Result = []
-    # transform the query into Joanne's server
+    
+    ##transform the query into Joanne's server
     words = query_in.split()
     words2 = []
-    word_filter = {}
-    mark_list = []
-
+    word_filter = {} ##記錄某個位子只能用哪些字
+    mark_list =[]  ##記錄哪幾個位置要變色
+    sim_posi = -1 ##記錄第一個相似詞的位置
+    
     for i in range(len(words)):
 
         word = words[i]
-
-        if word == "*":  # 有特殊語法
+        
+        if word == "*":##有特殊語法
             words2.append("*")
             mark_list.append(i)
         elif word[0] == "+":
-            paraphrase = getParaphrase(word[1:])
-            if len(paraphrase) == 0:  # 找不到就查自己就好
+            ##記錄第一個相似詞的位置
+            if sim_posi == -1:
+                sim_posi = i
+                print "sim_posi",sim_posi
+                
+            paraphrases = getParaphrase(word[1:]) #[(w1,score1),(w2,socre2),...]
+
+            if len(paraphrases) == 1: ##找不到就查自己就好
                 words2.append(word[0][1:])
-                word_filter[i] = {word[0][1:]: True}
+                word_filter[i] = {word[0][1:]:1.0}
             else:
                 words2.append("*")
-                word_filter[i] = dict([(data, True) for data in paraphrase])
+                word_filter[i] = dict([(data[0],data[1]) for data in paraphrases])                
             mark_list.append(i)
-
+            
         elif word.count("|") > 0:
-            # words2.append("*")
+            #words2.append("*")
             words2.append(word)
-            word_filter[i] = dict([(data, True) for data in word.split("|")])
+            word_filter[i] = dict([(data,True) for data in word.split("|")])
             mark_list.append(i)
         else:
             words2.append(word)
@@ -100,25 +107,37 @@ def getSearchResults_Inside(query_in):
                 mark_list.append(i)
 
     query_out = " ".join(words2)
-
-    print "submit query", ctime()
-    temp_Result = [[data[0].split(), data[1]] for data in getRotateNgramResults(query_out) if len(data) == 2 and len(data[0].split()) > 0]
-    print "get result", ctime()
-    # start filtering
+    
+    print "submit query",ctime()
+    temp_Result = [[data[0].split(),data[1]] for data in getRotateNgramResults(query_out) if len(data) == 2 and len(data[0].split()) > 0]    
+    print "get result",ctime()
+    ##start filtering
     for posi in word_filter:
-        temp_Result = [data for data in temp_Result if data[0][
-            posi] in word_filter[posi]]
+        temp_Result = [data for data in temp_Result if data[0][posi] in word_filter[posi]]
 
-    ## 標記查詢的特殊詞
+    ##標記查詢的特殊詞
     for posi in mark_list:
         for i in range(len(temp_Result)):
-            temp_Result[i][0][posi] = '<span class="SW">' + \
-                temp_Result[i][0][posi] + "</span>"
+            temp_Result[i][0][posi] = '<span class="SW">'+temp_Result[i][0][posi]+"</span>"
 
-    Search_Result = [(" ".join(data[0]), float(data[1]))
-                     for data in temp_Result]
+    ## 回傳查詢的結果
+    Search_Result = []
 
-    return Search_Result
+    ##如果沒有相似詞的要求  直接輸出
+    if sim_posi == -1:
+        for data in temp_Result:
+            words = " ".join(data[0])
+            freq = float(data[1])
+            Search_Result.append((words,freq,0))
+    else: #有相似詞的要求  則查詢單字的相似度後輸出
+        for data in temp_Result:
+            words = " ".join(data[0])
+            freq = float(data[1])
+            sim_word = data[0][sim_posi]
+            sim_score = word_filter[sim_posi][sim_word.replace('<span class="SW">','').replace("</span>","")]
+            Search_Result.append((words,freq,sim_score))
+            
+    return Search_Result   
 
 
 def query_extend(query_in):

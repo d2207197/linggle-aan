@@ -28,6 +28,7 @@ app.config.from_object(__name__)
 # app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
+
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
 
@@ -37,6 +38,18 @@ def init_db():
         with app.open_resource('schema.sql') as f:
             db.cursor().executescript(f.read())
         db.commit()
+
+def compare(x,y):
+    if x[2] > y[2]:
+        return -1
+    elif x[2] < y[2]:
+        return 1
+    elif x[1] > y[1]:
+        return -1
+    elif x[1] < y[1]:
+        return 1
+    else:
+        return 0
 
 
 @app.before_request
@@ -124,7 +137,8 @@ def query(query):
 
     total_no = sum([data[1] for data in Search_Result])
     ##排序 以便取Top N
-    Search_Result.sort(key=lambda x: x[1], reverse=True)
+    #Search_Result.sort(key=lambda x: x[1], reverse=True)
+    Search_Result.sort(cmp = compare)
 
     ##取前Top N就好
     Search_Result = [[data[0], data[1], data[1] * 100 / total_no]
@@ -186,6 +200,7 @@ if __name__ == '__main__':
         app_options["debug"] = True
         app_options["use_debugger"] = False
         app_options["use_reloader"] = False
+        app_options["host"] = "0.0.0.0"
 
     app.run(**app_options)
  
