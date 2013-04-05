@@ -214,6 +214,8 @@ def query(query):
 ##                    ##將數次查詢的結果整合到一個資料庫中以便排序
 ##                    Search_Result.extend(Search_Result_temp)
 
+    ##避免搜尋到重複的結果
+    Search_Result = list(set(Search_Result))
     total_no = sum([data[1] for data in Search_Result])
     ##排序 以便取Top N
     #Search_Result.sort(key=lambda x: x[1], reverse=True)
