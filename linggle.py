@@ -198,15 +198,21 @@ def query(query):
                     Search_Result.extend(Search_Result_temp)
 
         else:
-            print "not all star"
-            if query_in.count("?") + query_in.count("...") == 0:  # 直接處理
-                Search_Result = getSearchResults_Inside(query_in)
-            else:
-                new_queries = query_extend(query_in)
-                for query in new_queries:
-                    Search_Result_temp = getSearchResults_Inside(query)
-                    ##將數次查詢的結果整合到一個資料庫中以便排序
-                    Search_Result.extend(Search_Result_temp)
+            new_queries = query_extend(query_in)
+            for query in new_queries:
+                Search_Result_temp = getSearchResults_Inside(query)
+                ##將數次查詢的結果整合到一個資料庫中以便排序
+                Search_Result.extend(Search_Result_temp)
+            
+##            print "not all star"
+##            if query_in.count("?") + query_in.count("...") == 0:  # 直接處理
+##                Search_Result = getSearchResults_Inside(query_in)
+##            else:
+##                new_queries = query_extend(query_in)
+##                for query in new_queries:
+##                    Search_Result_temp = getSearchResults_Inside(query)
+##                    ##將數次查詢的結果整合到一個資料庫中以便排序
+##                    Search_Result.extend(Search_Result_temp)
 
     total_no = sum([data[1] for data in Search_Result])
     ##排序 以便取Top N
@@ -269,7 +275,7 @@ if __name__ == '__main__':
     cmd_args = parser.parse_args()
     app_options = {"port": cmd_args.port}
 
-    if cmd_args.debug_mode:
+    if cmd_args.debug_mode == False:
         app_options["debug"] = True
         app_options["use_debugger"] = False
         app_options["use_reloader"] = False

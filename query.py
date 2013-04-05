@@ -160,11 +160,15 @@ def query_extend(query_in):
             else:
                 queries.extend([data + [word[1:]]
                                for data in queries for star in starlist])
+        elif word == "$D":
+            queries.extend([data + ["$D"] for data in queries])
         else:  # 基本型變化
             queries = [data + [word] for data in queries]
 
     queries = [data for data in list(
         set([" ".join(query) for query in queries])) if data.count(" ") < 5]
+
+    print "waha=>",queries
     return queries
 
 
@@ -176,7 +180,7 @@ def similar_query_split(query_in):
     ##先看有幾組 similar
     similars = [(i, getParaphrase(
         words[i][1:])) for i in range(len(words)) if words[i][0] == "+"]
-    print similars
+    #print similars
     if len(similars) == 0:  # 沒有則離開
         return []
     else:
