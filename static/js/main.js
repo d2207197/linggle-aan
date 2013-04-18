@@ -477,16 +477,19 @@ function showResult(data)
 			var block = $("<tr/>").attr("index",i).addClass("block ngram").appendTo($("#result-block"));
 
 			// note container
-			var note = $("<td/>").addClass("note-container").appendTo(block);
-			$("<img/>").addClass("note-img").attr("src","static/img/note.png").appendTo(note);
+			// var note = $("<td/>").addClass("note-container").appendTo(block);
+			// $("<img/>").addClass("note-img").attr("src","static/img/note.png").appendTo(note);
 
 			// pharse container
 			var phraseContainer = $("<td/>").addClass("phrase-container").appendTo(block);
 			$("<div/>").addClass("text").html(data[i].phrase).appendTo(phraseContainer);
 			// alert(restore(data[i].percent));
 
-
-			var bar = $("<div/>").addClass("bar").attr("length", restore(data[i].percent)*360).appendTo(phraseContainer);
+			// phraseWidth = parseInt($('.phrase-container').css('width'))
+			// console.log('phraseWidth:',phraseWidth)
+			// console.log('percent:',restore(data[i].percent))
+			// console.log('bar:',restore(data[i].percent)*phraseWidth)
+			var bar = $("<div/>").addClass("bar").attr("length", restore(data[i].percent)*580).appendTo(phraseContainer);
 
 			// count container
 			var countContainer = $("<td/>").addClass("count-container").attr("total",data[i].count).attr("count_str",data[i].count_str).appendTo(block);
