@@ -33,5 +33,6 @@ $('.entry-example').find('img').live('click',function(){
 		next.toggleClass('hide');
 	}
 
+	
 
 })

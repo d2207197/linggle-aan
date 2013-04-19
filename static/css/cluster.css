@@ -25,5 +25,13 @@
 /*.example-sent {clear: both;}*/
 /*--------------------------- end Cluster ---------------------------*/
 
+
+/* */
+.tag-container {max-width:128px; height: 24px; line-height:24px; background: whitesmoke; border: 1px solid #CCC; border-radius:5px;}
+.tag-container div {float:left;}
+.tag-status {width: 24px; text-align: center}
+/*.tag-status*/
+/*.tag-text*/
+
 #c1 {background: #c8fea9;}
 #c2 {background: #fdfeb0;}
