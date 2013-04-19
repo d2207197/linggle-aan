@@ -17,7 +17,7 @@ $('.entry-example').find('img').live('click',function(){
 		var quoteleft = $('<div/>').appendTo(example);
 		$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
 
-		var examplesent = $('<div/>').html('Farmers should <strong>cultivate</strong> their <strong>crops</strong> to get a good harvest.').appendTo(example);
+		var examplesent = $('<div/>').addClass('example-sent').html('Farmers should <strong>cultivate</strong> their <strong>crops</strong> to get a good harvest.').appendTo(example);
 		var quoteright = $('<div/>').appendTo(example);
 		$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
 		// insert the example

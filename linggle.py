@@ -152,6 +152,11 @@ def APIquery(query):
     #resp = Response("<PRE>"+"<br>".join(Search_Result).replace('<span class="SW">',"").replace("</span>","")+"</PRE>", status=200, mimetype='text/html')
     return resp
 
+# modified by Maxis
+@app.route('/about/')
+def about():
+    return render_template('about.html')
+
 @app.route('/query/<query>')
 def query(query):
     query_in = query
