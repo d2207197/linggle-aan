@@ -1,4 +1,4 @@
-$('.entry-example').find('img').live('click touch',function(){
+$('.entry-example').find('img').live('click',function(){
 
 	// console.log('trigger example.');
 
@@ -34,7 +34,7 @@ $('.entry-example').find('img').live('click touch',function(){
 	}
 });
 
-$('.tag-container').live('click touch',function(){
+$('.tag-container').live('click',function(){
 	$(this).find('.tag-status').find('img').toggleClass('hide');
 	$(this).toggleClass('tag-on');
 });

@@ -275,7 +275,7 @@ if __name__ == '__main__':
                         help="port of server (default:%(default)s)", type=int, default=5000)
 
     cmd_args = parser.parse_args()
-    app_options = {"port": cmd_args.port,'host': '140.114.75.15'}
+    app_options = {"port": cmd_args.port,'host': '0.0.0.0'}
 
     if cmd_args.debug_mode == False:
         app_options["debug"] = True
