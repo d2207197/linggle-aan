@@ -19,6 +19,7 @@
 	<!-- CSS -->
 	<link type="text/css" rel="stylesheet" href="static/css/main.css" />
 	<link type="text/css" rel="stylesheet" href="static/css/utility.css" />
+	<link type="text/css" rel="stylesheet" href="static/css/cluster.css" />
 
 	<!-- jQuery -->
 	<script type="text/javascript" src="static/js/jquery.js"></script>
@@ -82,10 +83,106 @@
 		</div>
 		<div id="content">
 			<div id="cmd-convert-result"></div>
+
+			<div id="result-block-container">
+				<div id="cluster-label-container">
+					preserve for cluster label (relationship, crop)
+				</div>
+
+				<div id="cluster-type-container">
+					preserve for cluster type (VN, AN)
+				</div>
+
+				<hr><br>
+
+				<div id="clusters-container" class="f">
+
+					<div class="cluster" id="c1">
+						<div class="cluster-label-container">
+							<div class="cluster-label-mask">
+							</div>
+							<div class="cluster-label">
+								relationship
+							</div>
+						</div>
+						<div>
+							<div class="entry">
+								<div class="entry-ngram">
+									<span>cultivate relationship</span>
+								</div>
+								<div class="entry-count">
+									<span>4,500,000<span>
+								</div>
+								<div class="entry-percent">
+									<span>93.4%<span>
+								</div>
+								<div class="entry-example">
+									<span class="entry-example-btn">+</span>
+								</div>
+							</div>
+							<div class="example-container hide">
+
+								<div>
+									<img src="static/img/quote-left.png" />
+								</div>
+								<div class="example-sent">
+									Farmers should <stong>cultivate</stong> their <stong>crops</stong> to get a good harvest.
+								</div>
+								<div>
+									<img src="static/img/quote-right.png" />
+								</div>
+							</div>
+						</div>
+					</div>
+
+
+	
+					<div class="cluster" id="c2">
+						<div class="cluster-label-container">
+							<div class="cluster-label-mask">
+							</div>
+							<div class="cluster-label">
+								crop
+							</div>
+						</div>
+						<div>
+							<div class="entry">
+								<div class="entry-ngram">
+									<span>cultivate crops</span>
+								</div>
+								<div class="entry-count">
+									<span>4,500,000<span>
+								</div>
+								<div class="entry-percent">
+									<span>93.4%<span>
+								</div>
+								<div class="entry-example">
+									<span class="entry-example-btn">+</span>
+								</div>
+							</div>
+							<div class="example-container">
+
+								<div>
+									<img src="static/img/quote-left.png" />
+								</div>
+								<div class="example-sent">
+									Farmers should <stong>cultivate</stong> their <stong>crops</stong> to get a good harvest.
+								</div>
+								<div>
+									<img src="static/img/quote-right.png" />
+								</div>
+							</div>
+						</div>
+					</div>
+
+
+
+				</div>
+			</div>
 			<table id="result-block"  cellspacing="0" cellpadding="0"></table>
 		</div>
 		<div id="content-mask"></div>
-		<div></div>
+		
 	</div>
 </body>
 

@@ -1,0 +1,28 @@
+#result-block-container { width: 800px; position: relative; margin: 0 auto;  }
+#clusters-container {background: yellow;}
+
+
+
+/*---------------------------- Cluster ----------------------------*/
+.cluster {width: 760px; background: #444; margin: 0 auto; margin-bottom:32px; border-radius:8px; border: 1px solid #DDD}
+.cluster-label-container {height: 36px; line-height: 36px; font-size: larger; position: relative;}
+
+.cluster-label-mask {height: 100%; width: 100%; background: white; opacity: 0.5; position: absolute; z-index: 1;}
+.cluster-label { padding-left: 12px; height: 100%; width: 100%; position: absolute; z-index: 2;}
+
+.entry-ngram, .entry-count, .entry-percent, .entry-example {display: inline-block; line-height: 28px; height:28px;}
+.entry-ngram { width: 500px; padding-left: 14px;}
+.entry-count, .entry-percent {text-align: center;}
+.entry-count {width: 128px;}
+.entry-percent {width: 64px;}
+.entry-example {width: 32px;text-align: center;}
+
+.example-container {height: 36px; line-height: 36px; padding-left: 30px;}
+.example-container div {min-width:36px; float:left; line-height: 36px; height: 36px;}
+/*.example-sent {clear: both;}*/
+/*--------------------------- end Cluster ---------------------------*/
+
+
+
+#c1 {background: #c8fea9;}
+#c2 {background: #fdfeb0;}
