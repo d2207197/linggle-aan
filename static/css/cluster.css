@@ -20,7 +20,8 @@
 
 .example-container {height: 36px; line-height: 36px; padding-left: 30px;}
 .example-container div {min-width:36px; float:left; line-height: 36px; height: 36px;}
-.entry-example-btn {width: 20px; height: 20px; margin-top: 4px;}
+.entry-example img {width: 20px; height: 20px; margin-top: 4px;}
+.entry-example img:hover {cursor:pointer;}
 /*.example-sent {clear: both;}*/
 /*--------------------------- end Cluster ---------------------------*/
 
