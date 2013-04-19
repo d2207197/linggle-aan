@@ -32,7 +32,9 @@ $('.entry-example').find('img').live('click',function(){
 		entry.find('.entry-example').find('img').toggleClass('hide');
 		next.toggleClass('hide');
 	}
+});
 
-	
-
-})
+$('.tag-container').live('click',function(){
+	$(this).find('.tag-status').find('img').toggleClass('hide');
+	$(this).toggleClass('tag-on');
+});

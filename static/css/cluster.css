@@ -27,12 +27,13 @@
 
 
 /* */
-#cluster-tag-container {width: 800px; min-height: 28px;/* background: red;*/}
-.tag-on {background: #FDFDFD; color:#454545; box-shadow: 1px 1px 3px 0px #CCC;}
-.tag-off {background: #EEE;  color:#666; box-shadow: 1px 1px 2px 0px #888 inset;}
-.tag-container {float: left;}
-.tag-container {min-width:36px; height: 24px; line-height:24px; border: 1px solid #CCC; border-radius:5px; display:; margin-right:15px; }
+#cluster-tag-container {width: 800px; min-height:26px; max-height: 64px; /* background: red;*/}
+/*.tag-on {background: #FDFDFD!important; color:#454545!important; box-shadow: 1px 1px 3px 0px #CCC!important;}*/
+.tag-on {background: #FDFDFD!important; color:#454545!important; box-shadow: 1px 1px 3px 0px #CCC!important;}
+/*.tag-off {}*/
+.tag-container {min-width:36px; height: 24px; line-height:24px; display: inline-block; margin-bottom: 2px; border: 1px solid #CCC; border-radius:5px; display:; margin-right:15px; background: #EEE;  color:#666; box-shadow: 1px 1px 2px 0px #999 inset;}
 .tag-container:hover {cursor: pointer;}
+/*.tag-container:active {cursor: pointer;}*/
 .tag-container div {float:left;}
 .tag-status {width: 24px; text-align: center}
 .tag-status img {width:10px;}
