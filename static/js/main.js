@@ -73,6 +73,19 @@ function adjustBrowser()
 	// if(CHROME) SPEECH_SUPPORT = true;
 // }
 
+function detectPlatform()
+{
+	if(navigator.platform.indexOf('iPad'))
+	{
+
+	}else if(navigator.platform.indexOf('MacIntel'))
+	{
+
+	}
+	
+	
+}
+
 function redirect(query, mode)
 {
 	window.location = '#' + query + '#' + mode;
@@ -150,10 +163,8 @@ function events()
 
 		exampleHandler(EXAMPLE_STATE);
 	});
-	$(".option-container").live('click',function(){
+	$(".option-container").live('click touchstart',function(){
 		choose(parseInt($(this).attr("idx")));		// highlight the selected item
-
-		// alert($(this).find(".option").html());
 
 
 		var query = $(this).find(".option").html().split("<span>")[0];
@@ -181,7 +192,7 @@ function events()
 		});
 
 	});
-	$("body").click(function(){ 					// press anywhere to close the help
+	$("body").bind('click touchstart', function(){ 					// press anywhere to close the help
 		$("#help-container").fadeOut(0, function(){
 			$("#help-mask").hide(0,function(){
 				$("body").css("overflow","auto");	// restore the scroll bar
