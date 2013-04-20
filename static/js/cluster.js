@@ -4,7 +4,7 @@ function _test_cluster()
 	// $.each() ...
 	// ...
 	var getCluster = $.ajax({
-  		url: "/static/test.json",
+  		url: "/static/test1.json",
   		type: "get",
   		dataType: "json"
 	});
@@ -26,15 +26,15 @@ function _test_cluster()
 
 				i++;
 				var cid = 'c' + (i).toString();
-				var cluster = $('<div></div>').addClass('cluster').attr('id',cid).appendTo(cluster_container);
+				var cluster = $('<div/>').addClass('cluster').attr('id',cid).appendTo(cluster_container);
 
 				console.log('Label:',cluster_label);
-				var cluster_label_container = $('<div></div>').addClass('cluster-label-container').appendTo(cluster);
+				var cluster_label_container = $('<div/>').addClass('cluster-label-container').appendTo(cluster);
 
-				var cluster_label_mask = $('<div></div>').addClass('cluster-label-mask').appendTo(cluster_label_container);
-				var cluster_label = $('<div></div>').addClass('cluster-label').text(cluster_label).appendTo(cluster_label_container);
+				var cluster_label_mask = $('<div/>').addClass('cluster-label-mask').appendTo(cluster_label_container);
+				var cluster_label = $('<div/>').addClass('cluster-label').text(cluster_label).appendTo(cluster_label_container);
 				
-				var entry_wrap = $('<div></div>').addClass('entry-wrap').appendTo(cluster);
+				var entry_wrap = $('<div/>').addClass('entry-wrap').appendTo(cluster);
 				$.each(memebers, function(i){
 					// get all members
 					ngram = memebers[i][0];
@@ -44,15 +44,15 @@ function _test_cluster()
 					console.log('count:',count);
 					console.log('percent:',percent);
 					
-					var entry = $('<div></div>').addClass('entry').appendTo(entry_wrap);
+					var entry = $('<div/>').addClass('entry').appendTo(entry_wrap);
 
-					var entry_ngram = $('<div></div>').addClass('entry-ngram').html(ngram).appendTo(entry);
-					var entry_count = $('<div></div>').addClass('entry-count').text(count).appendTo(entry);
-					var entry_percent = $('<div></div>').addClass('entry-percent').text(percent).appendTo(entry);
-					var entry_example = $('<div></div>').addClass('entry-example').appendTo(entry);
+					var entry_ngram = $('<div/>').addClass('entry-ngram').html(ngram).appendTo(entry);
+					var entry_count = $('<div/>').addClass('entry-count').text(count).appendTo(entry);
+					var entry_percent = $('<div/>').addClass('entry-percent').text(percent).appendTo(entry);
+					var entry_example = $('<div/>').addClass('entry-example').appendTo(entry);
 
-					var example_btn_expand = $('</img>').addClass('entry-example-btn-expand').attr('src','static/img/example-btn.png').appendTo(entry_example);
-					var example_btn_shrink = $('</img>').addClass('entry-example-btn-shrink hide').attr('src','static/img/example-btn-shrink.png').appendTo(entry_example);
+					var example_btn_expand = $('<img/>').addClass('entry-example-btn-expand').attr('src','static/img/example-btn.png').appendTo(entry_example);
+					var example_btn_shrink = $('<img/>').addClass('entry-example-btn-shrink hide').attr('src','static/img/example-btn-shrink.png').appendTo(entry_example);
 
 					
 
