@@ -30,6 +30,7 @@ $(document).ready(function(){
 	layout();
 	events();
 	init();
+	_test_cluster();
 });
 // ------------------------------------------------------------------------------ //
 
@@ -383,6 +384,12 @@ function getPatternResult(server, query)
 	    // data: query,
 	    timeout: QUERY_SERVICE_TIMEOUT, // 15 sec
 	    success: function(data) {
+
+/////// 
+/////// IMPLEMENT THE NEW QUERY HERE
+/////// ..........
+/////// ..........
+///////
 
 			showResult(data); 	// show data
 			layout(); 			// adjust layout
