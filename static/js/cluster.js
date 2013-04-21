@@ -17,15 +17,20 @@ function _test_cluster()
 		$.each(data, function(cluster_type, c){
 			// get cluster type, e.g., VN:cultivate $N
 			
-			// console.log(cid);
-			
-			// var cluster = $('<div></div>').text('!!!!').appendTo(cluster_container);
 			var i = 0;
 			$.each(c, function(cluster_label, memebers){
 				// get cluster label, e.g., relationship
 
 				i++;
 				var cid = 'c' + (i).toString();
+
+				// generate cluster tag
+				var tag_container = $('<div/>').addClass('tag-container f small').attr('idx',cid).appendTo($('#cluster-tag-container'));
+				var tag_status = $('<div/>').addClass('tag-status').appendTo(tag_container);
+				$('<img/>').addClass('hide').attr('src','static/img/tag-on.png').appendTo(tag_status);
+				$('<img/>').attr('src','static/img/tag-off.png').appendTo(tag_status);
+				$('<div/>').addClass('tag-text').text(cluster_label).appendTo(tag_container);
+
 				var cluster = $('<div/>').addClass('cluster').attr('id',cid).appendTo(cluster_container);
 
 				console.log('Label:',cluster_label);
@@ -109,5 +114,17 @@ $('.entry-example').find('img').live('click',function(){
 $('.tag-container').live('click',function(){
 	$(this).find('.tag-status').find('img').toggleClass('hide');
 	$(this).toggleClass('tag-on');
+
+	var tag_on = $('.tag-on');
+	$('.cluster').addClass('hide');
+	$.each(tag_on, function(i){
+		var idx = tag_on.eq(i).attr('idx');
+		$('#'+idx).removeClass('hide');
+
+	})
+
+	// var idx = $(this).attr('idx');
+	// 
+	// 
 });
 
