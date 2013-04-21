@@ -4,7 +4,7 @@ function _test_cluster()
 	// $.each() ...
 	// ...
 	var getCluster = $.ajax({
-  		url: "/static/test1.json",
+  		url: "/static/test.json",
   		type: "get",
   		dataType: "json"
 	});
@@ -24,14 +24,17 @@ function _test_cluster()
 				i++;
 				var cid = 'c' + (i).toString();
 
+				if(i % 2 == 0)cluster_theme = 'cluster-even';
+				else cluster_theme = 'cluster-odd';
+
 				// generate cluster tag
-				var tag_container = $('<div/>').addClass('tag-container f small').attr('idx',cid).appendTo($('#cluster-tag-container'));
+				var tag_container = $('<div/>').addClass('tag-container f small tag-on').attr('idx',cid).appendTo($('#cluster-tag-container'));
 				var tag_status = $('<div/>').addClass('tag-status').appendTo(tag_container);
-				$('<img/>').addClass('hide').attr('src','static/img/tag-on.png').appendTo(tag_status);
-				$('<img/>').attr('src','static/img/tag-off.png').appendTo(tag_status);
+				$('<img/>').attr('src','static/img/tag-on.png').appendTo(tag_status);
+				$('<img/>').addClass('hide').attr('src','static/img/tag-off.png').appendTo(tag_status);
 				$('<div/>').addClass('tag-text').text(cluster_label).appendTo(tag_container);
 
-				var cluster = $('<div/>').addClass('cluster').attr('id',cid).appendTo(cluster_container);
+				var cluster = $('<div/>').addClass('cluster').attr('id',cid).addClass(cluster_theme).appendTo(cluster_container);
 
 				console.log('Label:',cluster_label);
 				var cluster_label_container = $('<div/>').addClass('cluster-label-container').appendTo(cluster);
@@ -117,9 +120,14 @@ $('.tag-container').live('click',function(){
 
 	var tag_on = $('.tag-on');
 	$('.cluster').addClass('hide');
+
 	$.each(tag_on, function(i){
 		var idx = tag_on.eq(i).attr('idx');
-		$('#'+idx).removeClass('hide');
+
+		if(i % 2 == 0)cluster_theme = 'cluster-even';
+		else cluster_theme = 'cluster-odd';
+
+		$('#'+idx).removeClass('hide cluster-even cluster-odd').addClass(cluster_theme);
 
 	})
 
