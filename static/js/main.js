@@ -216,27 +216,51 @@ function events()
 	// EXAMPLE SENTENCE EVENT
 	$(".expand-example").live('click',function(e){
 
+
+		console.log('trigger expand examples')
+
 		var ngramText = $(this).parents(".ngram").find(".phrase-container").find(".text").text();
 		var anchor = $(this);
-		$.ajax({
+		var exRequest = $.ajax({
 		    url: "examples/" + ngramText,
-		    dataType: "json",
+		    // dataType: "json",
 		    // data:"ngram="+ngramText,
 		    type: "GET",
-		    timeout: SENT_SERVICE_TIMEOUT, // reset timeout!!!!
-		    success: function(exampleSents) {
-		    	// console.log(exampleSents);
-		    	var exSents = exampleSents.Examples;
+		    // timeout: SENT_SERVICE_TIMEOUT // reset timeout!!!!
 
-		    	fillExampleSents(exSents, anchor, ngramText);
+		    // success: function(data) {
+
+		    // 	console.log('examples:',data);
+		    // 	// console.log(exampleSents);
+		    // 	// var exSents = exampleSents.Examples;
+
+		    // 	// fillExampleSents(exSents, anchor, ngramText);
 
 
-		    	// alert(ngram)
+		    // 	// alert(ngram)
 
-		    },
-		    complete: function(data) {},
-		    error: function(x, t, m) { if(t==="timeout") {/*console.log("got timeout");*/} else {/*console.log(t);*/} }
+		    // },
+		    // complete: function(data) {
+		    // 	// console.log(data)
+		    // },
+		    // error: function(x, t, m) { if(t==="timeout") {/*console.log("got timeout");*/} else {/*console.log(t);*/} }
 		});
+
+		// exRequest.done(function(recv){
+		// 	console.log(exRequest);
+		// 	console.log('done:',recv)
+		// });
+		exRequest.always(function(data){
+			if(data.readyState == 4)
+			{
+				if(data.responseText)
+				{	
+					exSents = data.responseText;
+					// fillExampleSents(exSents, anchor, ngramText);
+				}	
+			}
+		});
+
 		e.stopPropagation(); // prevent trigger parent event, or may cause loop trigger
 	});
 	$(".note-container").live("click",function(){
@@ -266,7 +290,7 @@ function fillExampleSents(sents, anchor, ngramText)
 	if(tr.hasClass("expand"))
 	{
 		ref = tr;
-		// expand example
+		// expand multi example
 		$.each(sents, function(i){
 			if($.trim(sents[i]).length > 0 )
 			{
@@ -357,23 +381,23 @@ function choose(idx)
 	var query = _target.find(".option").html().split("<span>")[0];
 	$("#search-bar").val(query);
 }
-function getExampleSent(ngram)
-{
-	$.ajax({
-	    url: "examples/",
-	    dataType: "json",
-	    data:"ngram="+ngram,
-	    type: "GET",
-	    timeout: SENT_SERVICE_TIMEOUT, // reset timeout!!!!
-	    success: function(exampleSents) {
-	    	alert(exampleSents);
-	    	// getPatternResult(server, query);
+// function getExampleSent(ngram)
+// {
+// 	$.ajax({
+// 	    url: "examples/",
+// 	    dataType: "json",
+// 	    data:"ngram="+ngram,
+// 	    type: "GET",
+// 	    timeout: SENT_SERVICE_TIMEOUT, // reset timeout!!!!
+// 	    success: function(exampleSents) {
+// 	    	alert(exampleSents);
+// 	    	// fetch_worker(server, query);
 
-	    },
-	    complete: function(data) {},
-	    error: function(x, t, m) { if(t==="timeout") {/*console.log("got timeout");*/} else {/*console.log(t);*/} }
-	});
-}
+// 	    },
+// 	    complete: function(data) {},
+// 	    error: function(x, t, m) { if(t==="timeout") {/*console.log("got timeout");*/} else {/*console.log(t);*/} }
+// 	});
+// }
 function showMsg(msg)
 {
 	var tr = $("<tr/>").addClass("block").appendTo($("#result-block"));
@@ -389,87 +413,79 @@ function _clear_previous_results()
 
 
 }
-function getPatternResult(server, query)
+
+/// fetch data from wujc, including cluster/tratitional results
+function fetch_worker(server, query)
 {
-	// alert(query);
-	$.ajax({
-	    url: server + query,
-	    // url: "static/go_home.json",
-	    // url: "static/cultivate_N.json",
-	    type: "GET",
-	    dataType: "json",
-	    timeout: QUERY_SERVICE_TIMEOUT, // 15 sec
-	    success: function(recv) {
+	var request = $.ajax({
+		url: server + query,
+		// url: "static/cultivate_N.json",
+		type: "GET",
+		dataType: "json",
+		timeout: QUERY_SERVICE_TIMEOUT
+	});
+	request.done(function(recv){
+		var mode = recv[0];
+		var data = recv[1];	    	
 
-			var mode = recv[0];
-			var data = recv[1];	    	
+		_clear_previous_results()
 
-			_clear_previous_results()
+		if(mode == 'new')
+		{
+			_show_clustering_results(data);
 
-			if(mode == 'new')
-			{
-				_extract_cluster(data);
-				$('#result-block').addClass('hide');
-				$('#result-block-container').removeClass('hide');
-				
-			}
-			else if(mode == 'old')
-			{
-				// console.log(data);
-				showResult(data);
-				$('#result-block-container').addClass('hide');
-				$('#result-block').removeClass('hide');				
-			}			
-/////// 
-/////// IMPLEMENT THE NEW QUERY HERE
-/////// ..........
-/////// ..........
-///////
+			$('#result-block').addClass('hide');
+			$('#result-block-container').removeClass('hide');
+			
+		}
+		else if(mode == 'old')
+		{
+			_show_traditional_results(data);
 
-			 	// show data
-			layout(); 			// adjust layout
-			fill(BAR_ANIMATE); 		// animate
-	    },
-	    complete: function(data) {
+			$('#result-block-container').addClass('hide');
+			$('#result-block').removeClass('hide');				
+			_bar_animater(BAR_ANIMATE); 	// animate
+		}
+		layout(); 			// adjust layout
+		
+	});
+	request.error(function(x, t, m){
+		if(t==="timeout") {
+			showMsg("system overloaded, please try again later.");
+        } else {
+			showMsg("internal server error, please try again later.");
+        }
+	});
 
-			// no matter success or error, close loading img
-			$("#search-loading").find("img").hide(0);
+	request.complete(function(data){
+		// no matter success or error, close loading img
+		$("#search-loading").find("img").hide(0);
 
-			// console.log(data.responseText);
+		if(data.readyState != 4)
+		{
+			///// ------------------ /////
+			///// Modify the message /////
+			///// ------------------ /////
+			// show no result
+			showMsg("no result.");
 
-			if(data.responseText.length <= 2)
-			{
+			// show try HLI or try CMD
+			// if(MODE == "CMD") var text = "Try Human Input";
+			// else var text = "Try Command Mode";
 
-				// show no result
-				showMsg("no result.");
+			// $("<span/>").text(text).attr('id','try-'+_MODE).insertAfter('#result-block').click(function(){
+			// 	redirect(query,_MODE);
+			// });	
 
-				// show try HLI or try CMD
-				if(MODE == "CMD") var text = "Try Human Input";
-				else var text = "Try Command Mode";
-
-				$("<span/>").text(text).attr('id','try-'+_MODE).appendTo(td).click(function(){
-					redirect(query,_MODE);
+		}else{
+			// show command convert result
+	    	if(MODE == "HLI") {
+				$('#cmd-convert-result').text("Command:");
+				$("<span/>").text(query).appendTo($('#cmd-convert-result')).click(function(){
+					redirect(encodeURIComponent(query),"CMD");
 				});
-
-			}else{
-				// show command convert result
-		    	if(MODE == "HLI") {
-					$('#cmd-convert-result').text("Command:");
-					$("<span/>").text(query).appendTo($('#cmd-convert-result')).click(function(){
-						redirect(encodeURIComponent(query),"CMD");
-					});
-				}
 			}
-	    },
-	    error: function(x, t, m) {
-	        if(t==="timeout") {
-				showMsg("got timeout...");
-	            // console.log("got timeout");
-	        } else {
-	        	showMsg("internal server error. :(");
-	            // console.log(t);
-	        }
-	    }
+		}		
 	});
 }
 function query()
@@ -488,16 +504,18 @@ function query()
 
 	if(MODE == 'CMD')
 	{
-		getPatternResult(server, encode_query);
+		fetch_worker(server, encode_query);
 
 	}else if(MODE == 'HLI')
-	{
+	{	
+		// convert the Human-Input query into Command
 		$.ajax({
 		    url: "sent/"+encode_query,
 		    type: "GET",
 		    timeout: SENT_SERVICE_TIMEOUT,
 		    success: function(query) {
-		    	getPatternResult(server, query);
+		    	// fetch result using command query
+		    	fetch_worker(server, query);
 
 		    },
 		    complete: function(data) {},
@@ -507,7 +525,7 @@ function query()
 
 
 }
-function showResult(data)
+function _show_traditional_results(data)
 {
 	// clear current result
 	$("#result-block").html("");
@@ -529,19 +547,10 @@ function showResult(data)
 			// extract results
 			var block = $("<tr/>").attr("index",i).addClass("block ngram").appendTo($("#result-block"));
 
-			// note container
-			// var note = $("<td/>").addClass("note-container").appendTo(block);
-			// $("<img/>").addClass("note-img").attr("src","static/img/note.png").appendTo(note);
-
 			// pharse container
 			var phraseContainer = $("<td/>").addClass("phrase-container").appendTo(block);
 			$("<div/>").addClass("text").html(data[i].phrase).appendTo(phraseContainer);
-			// alert(restore(data[i].percent));
 
-			// phraseWidth = parseInt($('.phrase-container').css('width'))
-			// console.log('phraseWidth:',phraseWidth)
-			// console.log('percent:',restore(data[i].percent))
-			// console.log('bar:',restore(data[i].percent)*phraseWidth)
 			var bar = $("<div/>").addClass("bar").attr("length", restore(data[i].percent)*580).appendTo(phraseContainer);
 
 			// count container
@@ -581,7 +590,9 @@ function restore(p) // 89 % -> 0.89
 		return 0.01;
 	}
 }
-function fill(delay)
+
+/// perform filling the bar with pre-defined delay
+function _bar_animater(delay)
 {
 	$.each($(".bar"), function(i){
 		$(".bar").eq(i).animate({
@@ -649,7 +660,6 @@ function setMode()
 		$("#mode-container").addClass("no-speech");
 	}
 
-
 	// change examples
 	$(".option-container").parent().remove();
 	var ex = EXAMPLE[MODE];
@@ -677,6 +687,7 @@ function setMode()
 	});
 }
 
+// detect the current status, send the query if it is necessary 
 function infofetch()
 {
 	var params = location.hash.split('#');

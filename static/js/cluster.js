@@ -1,7 +1,7 @@
 var THRESHOLD = 5;
 var AutoOnTopK = 3;
 
-function _extract_cluster(data)
+function _show_clustering_results(data)
 {
 	var cluster_container = $('#clusters-container');
 	// cluster_container.html('');
@@ -9,7 +9,7 @@ function _extract_cluster(data)
 	$.each(data, function(cidx, c){
 		// get cluster label, e.g., relationship
 		var members = c.data;
-		
+		console.log('members',members);
 		
 		var cid = 'c' + (k).toString();
 		if(k % 2 == 0)cluster_theme = 'cluster-even';
@@ -78,29 +78,6 @@ function _extract_cluster(data)
 		}
 	});
 	
-}
-
-function _test_cluster()
-{
-	// get cluster data from wujc
-	// $.each() ...
-	// ...
-	var getCluster = $.ajax({
-		url: "static/cultivate_N.json",
-  		// url: "static/go_home.json",
-  		type: "get",
-  		dataType: "json"
-	});
-	getCluster.done(function(recv){
-		var mode = recv[0];
-		var data = recv[1];
-		if(mode == 'new'){
-			_extract_cluster(data);
-		}else if(mode == 'old'){
-		}
-	});
-	getCluster.fail(function(){});
-	getCluster.always(function(){});
 }
 
 $('.entry-example').find('img').live('click',function(){
