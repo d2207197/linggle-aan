@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sqlite3
+import sqlite3, os
 from flask import Flask, g, render_template, Response, json
 from contextlib import closing
 from time import ctime
@@ -18,6 +18,8 @@ SECRET_KEY = 'hey yo linggle'
 USERNAME = 'admin'
 PASSWORD = 'default'
 
+CLUSTER_ROOT = ['/corpus/Linggle/', '']
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,15 @@ app.config.from_object(__name__)
 # app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 ##=============cluster data loading===================
-vo_clusters_dic = pickle.loads(open('cluster_vo_large.pick','r').read())
+for path in CLUSTER_ROOT:
+    # print path
+    if os.path.exists(path):
+        CLUSTER_ROOT_PATH = path
+        break
+    else:
+        CLUSTER_ROOT_PATH = ''
+
+vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick','r').read())
 #vs_clusters_dic = pickle.loads(open('cluster_vs_large.pick','r').read())
 #ov_clusters_dic = pickle.loads(open('cluster_ov_large.pick','r').read())
 
