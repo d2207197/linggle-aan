@@ -1,8 +1,9 @@
-var THRESHOLD = 10;
+var THRESHOLD = 5;
 
 function _extract_cluster(data)
 {
 	var cluster_container = $('#clusters-container');
+	// cluster_container.html('');
 	var k = 0;
 	$.each(data, function(cidx, c){
 		// get cluster label, e.g., relationship
@@ -13,10 +14,11 @@ function _extract_cluster(data)
 		// console.log('c:',c);
 		var members = c.data;
 
-		k++;
+		
 		var cid = 'c' + (k).toString();
 		if(k % 2 == 0)cluster_theme = 'cluster-even';
 		else cluster_theme = 'cluster-odd';
+		k++;
 
 		// generate cluster tag
 		var tag_container = $('<div/>').addClass('tag-container f small tag-on').attr('idx',cid).appendTo($('#cluster-tag-container'));
@@ -56,21 +58,16 @@ function _extract_cluster(data)
 			var example_btn_shrink = $('<img/>').addClass('entry-example-btn-shrink hide').attr('src','static/img/example-btn-shrink.png').appendTo(entry_example);
 		});
 
-		// var entry = $(entry_wrap).find('.entry');
+		// add the (more) item
+		// console.log(entry_wrap.find('.entry').length);
+		console.log();
 		if(entry_wrap.find('.entry').length >= THRESHOLD)
 		{
 			var more_wrap = $('<div/>').addClass('more-wrap').appendTo(cluster);
-			$('<span/>').addClass('more-text').text('(more)').appendTo(more_wrap);
+			$('<span/>').addClass('more-text').text('(more ' + entry_wrap.find('.fold-target').length.toString() + '...)').appendTo(more_wrap);
 			$('<span/>').addClass('more-text hide').text('(less)').appendTo(more_wrap);
 		}
-		
-
 	});
-	$('.more-text').live('click',function(e){
-		$(this).parents('.cluster').find('.fold-target').toggleClass('hide');
-		$(this).parent().find('.more-text').toggleClass('hide')
-	});
-
 }
 
 function _test_cluster()

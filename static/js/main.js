@@ -248,6 +248,12 @@ function events()
 	$(".ngram").live("click",function(){
 		$(this).find(".expand-example").click();
 	});
+
+	// more event
+	$('.more-text').live('click',function(e){
+		$(this).parents('.cluster').find('.fold-target').toggleClass('hide');
+		$(this).parent().find('.more-text').toggleClass('hide');
+	});		
 }
 function fillExampleSents(sents, anchor, ngramText)
 {
@@ -374,13 +380,22 @@ function showMsg(msg)
 	var td = $("<td/>").addClass("no-result").appendTo(tr);
 	$("<span/>").text(msg).appendTo(td);
 }
+
+function _clear_previous_results()
+{
+	$('#cluster-tag-container').html('');
+	$('#clusters-container').html('');
+	$('#result-block').html('');
+
+
+}
 function getPatternResult(server, query)
 {
 	// alert(query);
 	$.ajax({
-	    // url: server + query,
+	    url: server + query,
 	    // url: "static/go_home.json",
-	    url: "static/cultivate_N.json",
+	    // url: "static/cultivate_N.json",
 	    type: "GET",
 	    dataType: "json",
 	    timeout: QUERY_SERVICE_TIMEOUT, // 15 sec
@@ -388,7 +403,9 @@ function getPatternResult(server, query)
 
 			var mode = recv[0];
 			var data = recv[1];	    	
-			console.log('recv:',recv)
+
+			_clear_previous_results()
+
 			if(mode == 'new')
 			{
 				_extract_cluster(data);
@@ -398,6 +415,7 @@ function getPatternResult(server, query)
 			}
 			else if(mode == 'old')
 			{
+				// console.log(data);
 				showResult(data);
 				$('#result-block-container').addClass('hide');
 				$('#result-block').removeClass('hide');				

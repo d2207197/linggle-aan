@@ -3,8 +3,8 @@
 
 /*---------------------------- Cluster ----------------------------*/
 .cluster {width: 760px; background: #444; margin: 0 auto; margin-bottom:32px; border-radius:8px; border: 1px solid #DDD; box-shadow: 2px 2px 6px 0px #AAA;}
-.cluster-odd  {background: #c8fea9;}
-.cluster-even {background: #fdfeb0;}
+.cluster-odd  {background: #fdfeb0;}
+.cluster-even {background: #c8fea9;}
 /*.cluster:nth-child(even) {background: #c8fea9;}
 .cluster:nth-child(odd) {background: #fdfeb0;}*/
 .cluster-label-container {height: 32px; line-height: 32px; color:#666; position: relative;}
@@ -14,7 +14,7 @@
 
 .entry, .more-wrap {border-top: 1px solid #D4D4D4; width:750px; margin: 0 auto; height: 28px; line-height: 28px;}
 .more-wrap {text-align: right;}
-.more-text {margin-right: 25px; color: #666;}
+.more-text {margin-right: 25px; color: #666; font-size: smaller;}
 .more-text:hover {cursor: pointer; color: #444; text-decoration: underline;}
 
 .entry-ngram, .entry-count, .entry-percent, .entry-example {float: left; line-height: 28px;}
@@ -34,7 +34,7 @@
 /*.more {border-top: 1px solid #D4D4D4; width:750px; margin: 0 auto; height: 28px; line-height: 28px;}*/
 
 /* */
-#cluster-tag-container {width: 800px; min-height:26px; max-height: 64px; margin-bottom:16px; /*background: red;*/}
+#cluster-tag-container {width: 800px; min-height:26px; /*max-height: 64px;*/ margin-bottom:16px; text-align: center; /*background: red;*/}
 /*.tag-on {background: #FDFDFD!important; color:#454545!important; box-shadow: 1px 1px 3px 0px #CCC!important;}*/
 .tag-on {background: #FDFDFD!important; color:#454545!important; box-shadow: 1px 1px 3px 0px #CCC inset!important;}
 /*.tag-off {}*/
