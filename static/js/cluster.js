@@ -1,4 +1,5 @@
 var THRESHOLD = 5;
+var AutoOnTopK = 3;
 
 function _extract_cluster(data)
 {
@@ -7,13 +8,8 @@ function _extract_cluster(data)
 	var k = 0;
 	$.each(data, function(cidx, c){
 		// get cluster label, e.g., relationship
-		// console.log(data);
-		// c.count;
-		// c.percent;
-		// c.tag;
-		// console.log('c:',c);
 		var members = c.data;
-
+		
 		
 		var cid = 'c' + (k).toString();
 		if(k % 2 == 0)cluster_theme = 'cluster-even';
@@ -21,13 +17,18 @@ function _extract_cluster(data)
 		k++;
 
 		// generate cluster tag
-		var tag_container = $('<div/>').addClass('tag-container f small tag-on').attr('idx',cid).appendTo($('#cluster-tag-container'));
+		var tag_container = $('<div/>').addClass('tag-container f small').attr('idx',cid).appendTo($('#cluster-tag-container'));
 		var tag_status = $('<div/>').addClass('tag-status').appendTo(tag_container);
-		$('<img/>').attr('src','static/img/tag-on.png').appendTo(tag_status);
-		$('<img/>').addClass('hide').attr('src','static/img/tag-off.png').appendTo(tag_status);
-		$('<div/>').addClass('tag-text').text(c.tag).appendTo(tag_container);
 
-		var cluster = $('<div/>').addClass('cluster').attr('id',cid).addClass(cluster_theme).appendTo(cluster_container);
+		$('<img/>').addClass('hide').attr('src','static/img/tag-on.png').appendTo(tag_status);
+		$('<img/>').attr('src','static/img/tag-off.png').appendTo(tag_status);
+
+		var tag_text = $('<div/>').addClass('tag-text').appendTo(tag_container);
+		
+		$('<span/>').text(c.tag).appendTo(tag_text);
+		$('<span/>').addClass('tag-text-count').text('('+members.length.toString()+')').appendTo(tag_text);
+
+		var cluster = $('<div/>').addClass('cluster hide').attr('id',cid).addClass(cluster_theme).appendTo(cluster_container);
 		var cluster_label_container = $('<div/>').addClass('cluster-label-container').appendTo(cluster);
 		var cluster_label_mask = $('<div/>').addClass('cluster-label-mask').appendTo(cluster_label_container);
 		var cluster_label = $('<div/>').addClass('cluster-label').text(c.tag).appendTo(cluster_label_container);
@@ -68,6 +69,15 @@ function _extract_cluster(data)
 			$('<span/>').addClass('more-text hide').text('(less)').appendTo(more_wrap);
 		}
 	});
+
+	// turn on top-3 cluster
+	$.each($('.tag-container'), function(i, obj){
+		if(i < AutoOnTopK)
+		{
+			obj.click();	
+		}
+	});
+	
 }
 
 function _test_cluster()
@@ -130,6 +140,7 @@ $('.entry-example').find('img').live('click',function(){
 });
 
 $('.tag-container').live('click',function(){
+
 	$(this).find('.tag-status').find('img').toggleClass('hide');
 	$(this).toggleClass('tag-on');
 
