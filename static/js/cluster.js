@@ -1,81 +1,99 @@
+var THRESHOLD = 10;
+
+function _extract_cluster(data)
+{
+	var cluster_container = $('#clusters-container');
+	var k = 0;
+	$.each(data, function(cidx, c){
+		// get cluster label, e.g., relationship
+		// console.log(data);
+		// c.count;
+		// c.percent;
+		// c.tag;
+		// console.log('c:',c);
+		var members = c.data;
+
+		k++;
+		var cid = 'c' + (k).toString();
+		if(k % 2 == 0)cluster_theme = 'cluster-even';
+		else cluster_theme = 'cluster-odd';
+
+		// generate cluster tag
+		var tag_container = $('<div/>').addClass('tag-container f small tag-on').attr('idx',cid).appendTo($('#cluster-tag-container'));
+		var tag_status = $('<div/>').addClass('tag-status').appendTo(tag_container);
+		$('<img/>').attr('src','static/img/tag-on.png').appendTo(tag_status);
+		$('<img/>').addClass('hide').attr('src','static/img/tag-off.png').appendTo(tag_status);
+		$('<div/>').addClass('tag-text').text(c.tag).appendTo(tag_container);
+
+		var cluster = $('<div/>').addClass('cluster').attr('id',cid).addClass(cluster_theme).appendTo(cluster_container);
+		var cluster_label_container = $('<div/>').addClass('cluster-label-container').appendTo(cluster);
+		var cluster_label_mask = $('<div/>').addClass('cluster-label-mask').appendTo(cluster_label_container);
+		var cluster_label = $('<div/>').addClass('cluster-label').text(c.tag).appendTo(cluster_label_container);
+		
+		var entry_wrap = $('<div/>').addClass('entry-wrap').appendTo(cluster);
+
+
+		$.each(members, function(i){
+			// get all members
+			ngram = members[i][0];
+			count = members[i][1];
+			percent = members[i][2];
+			
+			if(i >= THRESHOLD) {
+				fold = 'fold-target hide';
+			}else{
+				fold = '';
+			}
+
+			var entry = $('<div/>').addClass('entry '+fold).appendTo(entry_wrap);
+
+			var entry_ngram = $('<div/>').addClass('entry-ngram').html(ngram).appendTo(entry);
+			var entry_count = $('<div/>').addClass('entry-count').text(count).appendTo(entry);
+			var entry_percent = $('<div/>').addClass('entry-percent').text(percent).appendTo(entry);
+			var entry_example = $('<div/>').addClass('entry-example').appendTo(entry);
+
+			var example_btn_expand = $('<img/>').addClass('entry-example-btn-expand').attr('src','static/img/example-btn.png').appendTo(entry_example);
+			var example_btn_shrink = $('<img/>').addClass('entry-example-btn-shrink hide').attr('src','static/img/example-btn-shrink.png').appendTo(entry_example);
+		});
+
+		// var entry = $(entry_wrap).find('.entry');
+		if(entry_wrap.find('.entry').length >= THRESHOLD)
+		{
+			var more_wrap = $('<div/>').addClass('more-wrap').appendTo(cluster);
+			$('<span/>').addClass('more-text').text('(more)').appendTo(more_wrap);
+			$('<span/>').addClass('more-text hide').text('(less)').appendTo(more_wrap);
+		}
+		
+
+	});
+	$('.more-text').live('click',function(e){
+		$(this).parents('.cluster').find('.fold-target').toggleClass('hide');
+		$(this).parent().find('.more-text').toggleClass('hide')
+	});
+
+}
+
 function _test_cluster()
 {
 	// get cluster data from wujc
 	// $.each() ...
 	// ...
 	var getCluster = $.ajax({
-  		url: "/static/test.json",
+		url: "static/cultivate_N.json",
+  		// url: "static/go_home.json",
   		type: "get",
   		dataType: "json"
 	});
-
-	var cluster_container = $('#clusters-container');
-
-	getCluster.done(function(data){
-
-		
-		$.each(data, function(cluster_type, c){
-			// get cluster type, e.g., VN:cultivate $N
-			
-			var i = 0;
-			$.each(c, function(cluster_label, memebers){
-				// get cluster label, e.g., relationship
-
-				i++;
-				var cid = 'c' + (i).toString();
-
-				if(i % 2 == 0)cluster_theme = 'cluster-even';
-				else cluster_theme = 'cluster-odd';
-
-				// generate cluster tag
-				var tag_container = $('<div/>').addClass('tag-container f small tag-on').attr('idx',cid).appendTo($('#cluster-tag-container'));
-				var tag_status = $('<div/>').addClass('tag-status').appendTo(tag_container);
-				$('<img/>').attr('src','static/img/tag-on.png').appendTo(tag_status);
-				$('<img/>').addClass('hide').attr('src','static/img/tag-off.png').appendTo(tag_status);
-				$('<div/>').addClass('tag-text').text(cluster_label).appendTo(tag_container);
-
-				var cluster = $('<div/>').addClass('cluster').attr('id',cid).addClass(cluster_theme).appendTo(cluster_container);
-
-				console.log('Label:',cluster_label);
-				var cluster_label_container = $('<div/>').addClass('cluster-label-container').appendTo(cluster);
-
-				var cluster_label_mask = $('<div/>').addClass('cluster-label-mask').appendTo(cluster_label_container);
-				var cluster_label = $('<div/>').addClass('cluster-label').text(cluster_label).appendTo(cluster_label_container);
-				
-				var entry_wrap = $('<div/>').addClass('entry-wrap').appendTo(cluster);
-				$.each(memebers, function(i){
-					// get all members
-					ngram = memebers[i][0];
-					count = memebers[i][1];
-					percent = memebers[i][2];
-					console.log('ngram:',ngram);
-					console.log('count:',count);
-					console.log('percent:',percent);
-					
-					var entry = $('<div/>').addClass('entry').appendTo(entry_wrap);
-
-					var entry_ngram = $('<div/>').addClass('entry-ngram').html(ngram).appendTo(entry);
-					var entry_count = $('<div/>').addClass('entry-count').text(count).appendTo(entry);
-					var entry_percent = $('<div/>').addClass('entry-percent').text(percent).appendTo(entry);
-					var entry_example = $('<div/>').addClass('entry-example').appendTo(entry);
-
-					var example_btn_expand = $('<img/>').addClass('entry-example-btn-expand').attr('src','static/img/example-btn.png').appendTo(entry_example);
-					var example_btn_shrink = $('<img/>').addClass('entry-example-btn-shrink hide').attr('src','static/img/example-btn-shrink.png').appendTo(entry_example);
-
-					
-
-
-					
-				});
-
-			});
-			
-		});
+	getCluster.done(function(recv){
+		var mode = recv[0];
+		var data = recv[1];
+		if(mode == 'new'){
+			_extract_cluster(data);
+		}else if(mode == 'old'){
+		}
 	});
 	getCluster.fail(function(){});
 	getCluster.always(function(){});
-
-
 }
 
 $('.entry-example').find('img').live('click',function(){

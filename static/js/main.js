@@ -30,7 +30,7 @@ $(document).ready(function(){
 	layout();
 	events();
 	init();
-	_test_cluster();
+	// _test_cluster();
 });
 // ------------------------------------------------------------------------------ //
 
@@ -225,7 +225,7 @@ function events()
 		    type: "GET",
 		    timeout: SENT_SERVICE_TIMEOUT, // reset timeout!!!!
 		    success: function(exampleSents) {
-		    	console.log(exampleSents);
+		    	// console.log(exampleSents);
 		    	var exSents = exampleSents.Examples;
 
 		    	fillExampleSents(exSents, anchor, ngramText);
@@ -378,20 +378,37 @@ function getPatternResult(server, query)
 {
 	// alert(query);
 	$.ajax({
-	    url: server + query,
+	    // url: server + query,
+	    // url: "static/go_home.json",
+	    url: "static/cultivate_N.json",
 	    type: "GET",
 	    dataType: "json",
-	    // data: query,
 	    timeout: QUERY_SERVICE_TIMEOUT, // 15 sec
-	    success: function(data) {
+	    success: function(recv) {
 
+			var mode = recv[0];
+			var data = recv[1];	    	
+			console.log('recv:',recv)
+			if(mode == 'new')
+			{
+				_extract_cluster(data);
+				$('#result-block').addClass('hide');
+				$('#result-block-container').removeClass('hide');
+				
+			}
+			else if(mode == 'old')
+			{
+				showResult(data);
+				$('#result-block-container').addClass('hide');
+				$('#result-block').removeClass('hide');				
+			}			
 /////// 
 /////// IMPLEMENT THE NEW QUERY HERE
 /////// ..........
 /////// ..........
 ///////
 
-			showResult(data); 	// show data
+			 	// show data
 			layout(); 			// adjust layout
 			fill(BAR_ANIMATE); 		// animate
 	    },
@@ -400,7 +417,7 @@ function getPatternResult(server, query)
 			// no matter success or error, close loading img
 			$("#search-loading").find("img").hide(0);
 
-			console.log(data.responseText);
+			// console.log(data.responseText);
 
 			if(data.responseText.length <= 2)
 			{

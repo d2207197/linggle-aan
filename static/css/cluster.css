@@ -12,7 +12,11 @@
 .cluster-label-mask {height: 100%; width: 100%; background: white; opacity: 0.5; position: absolute; z-index: 1;}
 .cluster-label { padding-left: 12px; height: 100%; width: 100%; position: absolute; z-index: 2;}
 
-.entry {border-top: 1px solid #D4D4D4; width:750px; margin: 0 auto; height: 28px; line-height: 28px;}
+.entry, .more-wrap {border-top: 1px solid #D4D4D4; width:750px; margin: 0 auto; height: 28px; line-height: 28px;}
+.more-wrap {text-align: right;}
+.more-text {margin-right: 25px; color: #666;}
+.more-text:hover {cursor: pointer; color: #444; text-decoration: underline;}
+
 .entry-ngram, .entry-count, .entry-percent, .entry-example {float: left; line-height: 28px;}
 .entry-ngram { width: 480px; padding-left: 14px;}
 .entry-count, .entry-percent {text-align: center;}
@@ -27,9 +31,10 @@
 .example-sent {color:#444;}
 /*--------------------------- end Cluster ---------------------------*/
 
+/*.more {border-top: 1px solid #D4D4D4; width:750px; margin: 0 auto; height: 28px; line-height: 28px;}*/
 
 /* */
-#cluster-tag-container {width: 800px; min-height:26px; max-height: 64px; /* background: red;*/}
+#cluster-tag-container {width: 800px; min-height:26px; max-height: 64px; margin-bottom:16px; /*background: red;*/}
 /*.tag-on {background: #FDFDFD!important; color:#454545!important; box-shadow: 1px 1px 3px 0px #CCC!important;}*/
 .tag-on {background: #FDFDFD!important; color:#454545!important; box-shadow: 1px 1px 3px 0px #CCC inset!important;}
 /*.tag-off {}*/
