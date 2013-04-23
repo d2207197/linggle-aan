@@ -168,6 +168,10 @@ def APIquery(query):
 
 @app.route('/query/<query>')
 def query(query):
+
+    CLUSTER_RESULT_LIMIT = 300
+    TRADITIONAL_RESULT_LIMIT = 100
+
     query_in = query
     
     logger.debug('=' * 20)
@@ -196,7 +200,7 @@ def query(query):
 
         ##配合新版搭配詞功能，檢查是否符合特定搭配詞狀況
         if len(query_in) == 2 and query_in[1] == "$N" and query_in[0].isalpha(): ##VN
-            collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))]
+            collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
             ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源           
             collocates_dic = defaultdict(list)
             total_no = 0.0
@@ -270,7 +274,7 @@ def query(query):
 
             ##取前Top N就好
             Search_Result = [[data[0], data[1], data[1] * 100 / total_no]
-                             for data in Search_Result[:100]]
+                             for data in Search_Result[:TRADITIONAL_RESULT_LIMIT]]
 
             ## 進行統計跟格式的refinement
             Return_Result = []
