@@ -118,7 +118,7 @@ def getSearchResults_Inside(query_in):
     ##標記查詢的特殊詞
     for posi in mark_list:
         for i in range(len(temp_Result)):
-            temp_Result[i][0][posi] = '<span class="SW">'+temp_Result[i][0][posi]+"</span>"
+            temp_Result[i][0][posi] = '<strong>'+temp_Result[i][0][posi]+"</strong>"
 
     ## 回傳查詢的結果
     Search_Result = []
@@ -134,7 +134,7 @@ def getSearchResults_Inside(query_in):
             words = " ".join(data[0])
             freq = float(data[1])
             sim_word = data[0][sim_posi]
-            sim_score = word_filter[sim_posi][sim_word.replace('<span class="SW">','').replace("</span>","")]
+            sim_score = word_filter[sim_posi][sim_word.replace('<strong">','').replace("</strong>","")]
             Search_Result.append((words,freq,sim_score))
             
     return Search_Result   
