@@ -30,6 +30,7 @@ $(document).ready(function(){
 	layout();
 	events();
 	init();
+	// _test_cluster();
 });
 // ------------------------------------------------------------------------------ //
 
@@ -72,6 +73,19 @@ function adjustBrowser()
 
 	// if(CHROME) SPEECH_SUPPORT = true;
 // }
+
+function detectPlatform()
+{
+	if(navigator.platform.indexOf('iPad'))
+	{
+
+	}else if(navigator.platform.indexOf('MacIntel'))
+	{
+
+	}
+	
+	
+}
 
 function redirect(query, mode)
 {
@@ -150,10 +164,8 @@ function events()
 
 		exampleHandler(EXAMPLE_STATE);
 	});
-	$(".option-container").live('click',function(){
+	$(".option-container").live('click touchstart',function(){
 		choose(parseInt($(this).attr("idx")));		// highlight the selected item
-
-		// alert($(this).find(".option").html());
 
 
 		var query = $(this).find(".option").html().split("<span>")[0];
@@ -181,7 +193,7 @@ function events()
 		});
 
 	});
-	$("body").click(function(){ 					// press anywhere to close the help
+	$("body").bind('click touchstart', function(){ 					// press anywhere to close the help
 		$("#help-container").fadeOut(0, function(){
 			$("#help-mask").hide(0,function(){
 				$("body").css("overflow","auto");	// restore the scroll bar
@@ -213,7 +225,7 @@ function events()
 		    type: "GET",
 		    timeout: SENT_SERVICE_TIMEOUT, // reset timeout!!!!
 		    success: function(exampleSents) {
-		    	console.log(exampleSents);
+		    	// console.log(exampleSents);
 		    	var exSents = exampleSents.Examples;
 
 		    	fillExampleSents(exSents, anchor, ngramText);
@@ -236,6 +248,12 @@ function events()
 	$(".ngram").live("click",function(){
 		$(this).find(".expand-example").click();
 	});
+
+	// more event
+	$('.more-text').live('click',function(e){
+		$(this).parents('.cluster').find('.fold-target').toggleClass('hide');
+		$(this).parent().find('.more-text').toggleClass('hide');
+	});		
 }
 function fillExampleSents(sents, anchor, ngramText)
 {
@@ -362,18 +380,53 @@ function showMsg(msg)
 	var td = $("<td/>").addClass("no-result").appendTo(tr);
 	$("<span/>").text(msg).appendTo(td);
 }
+
+function _clear_previous_results()
+{
+	$('#cluster-tag-container').html('');
+	$('#clusters-container').html('');
+	$('#result-block').html('');
+
+
+}
 function getPatternResult(server, query)
 {
 	// alert(query);
 	$.ajax({
 	    url: server + query,
+	    // url: "static/go_home.json",
+	    // url: "static/cultivate_N.json",
 	    type: "GET",
 	    dataType: "json",
-	    // data: query,
 	    timeout: QUERY_SERVICE_TIMEOUT, // 15 sec
-	    success: function(data) {
+	    success: function(recv) {
 
-			showResult(data); 	// show data
+			var mode = recv[0];
+			var data = recv[1];	    	
+
+			_clear_previous_results()
+
+			if(mode == 'new')
+			{
+				_extract_cluster(data);
+				$('#result-block').addClass('hide');
+				$('#result-block-container').removeClass('hide');
+				
+			}
+			else if(mode == 'old')
+			{
+				// console.log(data);
+				showResult(data);
+				$('#result-block-container').addClass('hide');
+				$('#result-block').removeClass('hide');				
+			}			
+/////// 
+/////// IMPLEMENT THE NEW QUERY HERE
+/////// ..........
+/////// ..........
+///////
+
+			 	// show data
 			layout(); 			// adjust layout
 			fill(BAR_ANIMATE); 		// animate
 	    },
@@ -382,7 +435,7 @@ function getPatternResult(server, query)
 			// no matter success or error, close loading img
 			$("#search-loading").find("img").hide(0);
 
-			console.log(data.responseText);
+			// console.log(data.responseText);
 
 			if(data.responseText.length <= 2)
 			{
@@ -477,16 +530,19 @@ function showResult(data)
 			var block = $("<tr/>").attr("index",i).addClass("block ngram").appendTo($("#result-block"));
 
 			// note container
-			var note = $("<td/>").addClass("note-container").appendTo(block);
-			$("<img/>").addClass("note-img").attr("src","static/img/note.png").appendTo(note);
+			// var note = $("<td/>").addClass("note-container").appendTo(block);
+			// $("<img/>").addClass("note-img").attr("src","static/img/note.png").appendTo(note);
 
 			// pharse container
 			var phraseContainer = $("<td/>").addClass("phrase-container").appendTo(block);
 			$("<div/>").addClass("text").html(data[i].phrase).appendTo(phraseContainer);
 			// alert(restore(data[i].percent));
 
-
-			var bar = $("<div/>").addClass("bar").attr("length", restore(data[i].percent)*360).appendTo(phraseContainer);
+			// phraseWidth = parseInt($('.phrase-container').css('width'))
+			// console.log('phraseWidth:',phraseWidth)
+			// console.log('percent:',restore(data[i].percent))
+			// console.log('bar:',restore(data[i].percent)*phraseWidth)
+			var bar = $("<div/>").addClass("bar").attr("length", restore(data[i].percent)*580).appendTo(phraseContainer);
 
 			// count container
 			var countContainer = $("<td/>").addClass("count-container").attr("total",data[i].count).attr("count_str",data[i].count_str).appendTo(block);

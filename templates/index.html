@@ -19,13 +19,16 @@
 	<!-- CSS -->
 	<link type="text/css" rel="stylesheet" href="static/css/main.css" />
 	<link type="text/css" rel="stylesheet" href="static/css/utility.css" />
+	<link type="text/css" rel="stylesheet" href="static/css/cluster.css" />
 
 	<!-- jQuery -->
 	<script type="text/javascript" src="static/js/jquery.js"></script>
 	<script type="text/javascript" src="static/js/jquery.ba-hashchange.min.js"></script>
 	<script type="text/javascript" src="static/js/data.js"></script>
 	<script type="text/javascript" src="static/js/utility.js"></script>
+
 	<script type="text/javascript" src="static/js/layout.js"></script>
+	<script type="text/javascript" src="static/js/cluster.js"></script>
     <script type="text/javascript" src="static/js/main.js"></script>
 
     <link rel="shortcut icon" href="static/img/favicon.png" />
@@ -39,51 +42,62 @@
 		<div id="help-container" class="hide">
 			<table cellspacing="0" cellpadding="0"></table>
 		</div>
-		<div id="header">
-			<div id="title-container">
-				<img id="logo-linggle" src="static/img/linggle.png"/>
-				<img id="logo-square" src="static/img/square.png"/>
-			</div>
-			<div id="search-container">
-				<table id="search-table" cellspacing="0" cellpadding="0">
-					<tr>
-						<td id="search-bar-container" class="bar-normal">
-							<input id="search-bar" type="search" value=""></input>
-							<div id="mode-container" >
-								<table cellspacing="0" cellpadding="0">
-									<tr>
-										<td id="mode-label-container">
-											<div id="HLI-label" class="mode-label">Command</div>
-											<div id="CMD-label" class="mode-label hide">Human</div>
+		<div id="header-container">
+			<div id="header">
+				<div id="title-container">
+					<img id="logo-linggle" src="static/img/linggle.png"/>
+					<img id="logo-square" src="static/img/square.png"/>
+				</div>
+				<div id="search-container">
+					<table id="search-table" cellspacing="0" cellpadding="0">
+						<tr>
+							<td id="search-bar-container" class="bar-normal">
+								<input id="search-bar" type="search" value=""></input>
+								<div id="mode-container" >
+									<table cellspacing="0" cellpadding="0">
+										<tr>
+											<td id="mode-label-container">
+												<div id="HLI-label" class="mode-label">Command</div>
+												<div id="CMD-label" class="mode-label hide">Human</div>
 
-										</td>
-										<td id="mode-img-container">
-											<img id="HLI-img" class="mode-img" src="static/img/human.png"/>
-											<img id="CMD-img" class="mode-img hide" src="static/img/command.png"/>
-										</td>
-									</tr>
-								</table>
-							</div>
-						</td>
-					</tr>
-				</table>
+											</td>
+											<td id="mode-img-container">
+												<img id="HLI-img" class="mode-img" src="static/img/human.png"/>
+												<img id="CMD-img" class="mode-img hide" src="static/img/command.png"/>
+											</td>
+										</tr>
+									</table>
+								</div>
+							</td>
+						</tr>
+					</table>
 
-				<button id="search-button">
-					<img src="static/img/search.png"/>
-				</button>
+					<button id="search-button">
+						<img src="static/img/search.png"/>
+					</button>
 
-				<div id="search-example">Example</div>
-				<div id="search-help">Help</div>
+					<div id="search-example">Example</div>
+					<div id="search-help">Help</div>
 
-				<div id="search-loading"><img src="static/img/loading.gif"></div>
+					<div id="search-loading"><img src="static/img/loading.gif"></div>
+				</div>
 			</div>
 		</div>
 		<div id="content">
 			<div id="cmd-convert-result"></div>
-			<table id="result-block"  cellspacing="0" cellpadding="0"></table>
+
+			<div id="result-block-container"  class="hide">
+				<div id="cluster-type-container"><!-- preserve for cluster type (VN, AN) --></div>
+				<div id="cluster-tag-container"></div>
+				<div id="clusters-container" class="f"></div>
+			</div>
+			<table id="result-block"  cellspacing="0" cellpadding="0"  class="hide"></table>
 		</div>
 		<div id="content-mask"></div>
-		<div></div>
+		<div id="footer hide" class="f">
+			<div><a href="http://nlp.cs.nthu.edu.tw/" target="_blank">© 2013 NTHU NLPLab</a></div>
+			<div><a href="/about/">about Linggle</a></div>
+		</div>
 	</div>
 </body>
 

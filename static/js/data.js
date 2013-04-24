@@ -2,9 +2,12 @@
 var EXAMPLE = {
     "CMD": [
         "$A beach", 
+        "cultivate $N <span>cluster</span>",
         "$V an important $N", 
-        "go ?to home<span>fight</span>", 
-        "take $D ... trip", 
+
+        // "take $D ... trip", 
+        "go ?to home", 
+        
         "play $D +important role|part"
     ],
     "HLI": [

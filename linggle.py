@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sqlite3
+import sqlite3, os
 from flask import Flask, g, render_template, Response, json
 from contextlib import closing
 from time import ctime
@@ -18,6 +18,8 @@ SECRET_KEY = 'hey yo linggle'
 USERNAME = 'admin'
 PASSWORD = 'default'
 
+CLUSTER_ROOT = ['/corpus/Linggle/', '']
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,15 @@ app.config.from_object(__name__)
 # app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 ##=============cluster data loading===================
-vo_clusters_dic = pickle.loads(open('cluster_vo_large.pick','r').read())
+for path in CLUSTER_ROOT:
+    # print path
+    if os.path.exists(path):
+        CLUSTER_ROOT_PATH = path
+        break
+    else:
+        CLUSTER_ROOT_PATH = ''
+
+vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick','r').read())
 #vs_clusters_dic = pickle.loads(open('cluster_vs_large.pick','r').read())
 #ov_clusters_dic = pickle.loads(open('cluster_ov_large.pick','r').read())
 
@@ -168,6 +178,10 @@ def APIquery(query):
 
 @app.route('/query/<query>')
 def query(query):
+
+    CLUSTER_RESULT_LIMIT = 300
+    TRADITIONAL_RESULT_LIMIT = 100
+
     query_in = query
     
     logger.debug('=' * 20)
@@ -196,7 +210,8 @@ def query(query):
 
         ##配合新版搭配詞功能，檢查是否符合特定搭配詞狀況
         if len(query_in) == 2 and query_in[1] == "$N" and query_in[0].isalpha(): ##VN
-            collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))]
+            
+            collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
             ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源           
             collocates_dic = defaultdict(list)
             total_no = 0.0
@@ -220,21 +235,25 @@ def query(query):
                         for collocate in collocates_dic[word]:
                             cluster_cnt += collocate[1]
                             Detailed_Cluster.append((collocate[0],collocate[1]))
-                ##開始排序　取出 label
-                Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
-                print Detailed_Cluster
-                if len(Detailed_Cluster) > 0: ##有查到字才留
-                    ##進行格式化
-                    now_datas = {}
-                    now_datas['count'] = cluster_cnt
-                    now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
-                    now_datas['tag'] = Detailed_Cluster[0][0].upper()
-                    temp_data = [(query_in[0]+" "+data[0],ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
-                    now_datas['data'] = temp_data
-                    
-                    Result_Clusters.append(now_datas)
+
+                ##如果 Cluster 裡面超過 1 個字才呈現這個 cluster
+                if len(Detailed_Cluster) > 1:
+                    ##開始排序　取出 label
+                    Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
+                    print Detailed_Cluster
+                    if len(Detailed_Cluster) > 0: ##有查到字才留
+                        ##進行格式化
+                        now_datas = {}
+                        now_datas['count'] = cluster_cnt
+                        now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
+                        now_datas['tag'] = Detailed_Cluster[0][0].upper()
+                        temp_data = [(query_in[0]+" <strong>"+data[0]+"</strong>",ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
+                        now_datas['data'] = temp_data
+                        
+                        Result_Clusters.append(now_datas)
 
             Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
+
             for cluster in Result_Clusters:
                 cluster['count'] = ConvertFreq(cluster['count'])
 
@@ -270,7 +289,7 @@ def query(query):
 
             ##取前Top N就好
             Search_Result = [[data[0], data[1], data[1] * 100 / total_no]
-                             for data in Search_Result[:100]]
+                             for data in Search_Result[:TRADITIONAL_RESULT_LIMIT]]
 
             ## 進行統計跟格式的refinement
             Return_Result = []
@@ -326,7 +345,7 @@ if __name__ == '__main__':
                         help="port of server (default:%(default)s)", type=int, default=5000)
 
     cmd_args = parser.parse_args()
-    app_options = {"port": cmd_args.port}
+    app_options = {"port": cmd_args.port, 'host':'0.0.0.0'}
 
     if cmd_args.debug_mode == False:
         app_options["debug"] = True

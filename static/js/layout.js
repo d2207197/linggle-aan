@@ -6,7 +6,7 @@ function layout()
 	// set body
 	$("body").width(s.w-20).height(s.h);
 
-	var head = $("#header").outerHeight();
+	var head = $("#header-container").outerHeight();
 	var body = s.h-head;
 
 	// set content and its mask
