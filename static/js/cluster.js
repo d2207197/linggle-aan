@@ -100,13 +100,14 @@ $('.item-example').find('img').live('click',function(){
 		exRequest.done(function(data){
 			if(data.status)
 			{
-				// console.log(data);
+				var sent = data.sent[0];
 				var item_example = $('<tr/>').addClass('item-example-container hide');
 				var item_example_container = $('<td/>').attr('colspan',4).appendTo(item_example);
-				var quoteleft = $('<div/>').addClass('quoteleft').appendTo(item_example_container);
 
+				var quoteleft = $('<div/>').addClass('quoteleft').appendTo(item_example_container);
 				$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
-				$('<div/>').addClass('example-sent-new').text(data.sent).appendTo(item_example_container);
+
+				$('<div/>').addClass('example-sent-new').html(sent).appendTo(item_example_container);
 
 				var quoteright = $('<div/>').addClass('quoteright').appendTo(item_example_container);
 				$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
@@ -117,7 +118,7 @@ $('.item-example').find('img').live('click',function(){
 				item.find('.item-example').find('img').toggleClass('hide');
 				item_example.toggleClass('hide');				
 			}else{
-				entry.find('.item-example').find('img').remove();
+				item.find('.item-example').find('img').remove();
 			}
 		});
 		exRequest.complete(function(data){
@@ -160,21 +161,24 @@ $('.entry-example').find('img').live('click',function(){
 		var exRequest = $.ajax({
 
 			url: "examples/" + ngramText,
-			// url: 'static/A_beach.json',
+			// url: 'static/cultivate_relationships.json',
 			type: "GET",
 			dataType: "json",
 		});
 		exRequest.done(function(data){
+
 			if(data.status)
 			{
 				// get example successfully
 				// construct html element
+				var sent = data.sent[0];
 				var example = $('<div/>').addClass('example-container hide');
-				var quoteleft = $('<div/>').appendTo(example);
+				var quoteleft = $('<div/>').addClass('quoteleft-cluster').appendTo(example);
 				$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
 
-				var examplesent = $('<div/>').addClass('example-sent').html(data.sent).appendTo(example);
-				var quoteright = $('<div/>').appendTo(example);
+				var examplesent = $('<div/>').addClass('example-sent').html(sent).appendTo(example);
+
+				var quoteright = $('<div/>').addClass('quoteright-cluster').appendTo(example);
 				$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
 
 				// insert the example
