@@ -104,7 +104,14 @@ def sentence(sent):
 
 @app.route('/examples/<ngram>')
 def examples(ngram):
-    return Response(get_Examples(ngram), mimetype='application/json')
+    try:
+        return_data = {'status':True, 'sent':get_Examples(ngram)}
+    except:
+        ## 
+        logger.error('example fetch error')
+        return_data = {'status':False, 'sent':''}
+
+    return Response(json.dumps(return_data), mimetype='application/json')
 
 @app.route('/API/<query>')
 def APIquery(query):

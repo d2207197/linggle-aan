@@ -9,7 +9,7 @@ function _show_clustering_results(data)
 	$.each(data, function(cidx, c){
 		// get cluster label, e.g., relationship
 		var members = c.data;
-		console.log('members',members);
+		// console.log('members',members);
 		
 		var cid = 'c' + (k).toString();
 		if(k % 2 == 0)cluster_theme = 'cluster-even';
@@ -61,7 +61,7 @@ function _show_clustering_results(data)
 
 		// add the (more) item
 		// console.log(entry_wrap.find('.entry').length);
-		console.log();
+		// console.log();
 		if(entry_wrap.find('.entry').length >= THRESHOLD)
 		{
 			var more_wrap = $('<div/>').addClass('more-wrap').appendTo(cluster);
@@ -88,19 +88,36 @@ $('.item-example').find('img').live('click',function(){
 	var next = item.next();
 	var ngramText = item.find('.item-ngram-text').text()
 
-
-
 	if(!next.hasClass('item-example-container'))
 	{
 		$('#search-loading').find('img').show(0);
 
 		var exRequest = $.ajax({
-
 			url: "examples/" + ngramText,
-			// url: 'static/A_beach.json',
 			type: "GET",
-			beforeSend: function(){
-				
+			dataType: "json",
+		});
+		exRequest.done(function(data){
+			if(data.status)
+			{
+				// console.log(data);
+				var item_example = $('<tr/>').addClass('item-example-container hide');
+				var item_example_container = $('<td/>').attr('colspan',4).appendTo(item_example);
+				var quoteleft = $('<div/>').addClass('quoteleft').appendTo(item_example_container);
+
+				$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
+				$('<div/>').addClass('example-sent-new').text(data.sent).appendTo(item_example_container);
+
+				var quoteright = $('<div/>').addClass('quoteright').appendTo(item_example_container);
+				$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
+
+				item.after(item_example);
+
+				// toggle example
+				item.find('.item-example').find('img').toggleClass('hide');
+				item_example.toggleClass('hide');				
+			}else{
+				entry.find('.item-example').find('img').remove();
 			}
 		});
 		exRequest.complete(function(data){
@@ -108,33 +125,12 @@ $('.item-example').find('img').live('click',function(){
 
 			if(data.readyState != 4)
 			{
-				return false;
+				// return false;
 				
+			}else{
+
+
 			}
-			// exSent = 'A beatiful<strong>sandy</strong>beach ';
-			// exSent = 'Madeira lacks good beaches, but Porto Santo has a four-mile-long sandy beach, the island\'s major attraction.For swimming, there is Plattwood Park, Deep River\'s fresh water lake with a sandy beach, or, as little as 15 minutes away, Long Island Sound beaches in Westbrook and Madison.';
-			exSent = data.responseText;
-
-			var item_example = $('<tr/>').addClass('item-example-container hide');
-			var item_example_container = $('<td/>').attr('colspan',4).appendTo(item_example);
-
-			// var example = $('<div/>').addClass('example-container').appendTo(item_example_container);
-
-			var quoteleft = $('<div/>').addClass('quoteleft').appendTo(item_example_container);
-			$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
-
-			$('<div/>').addClass('example-sent-new').text(exSent).appendTo(item_example_container);
-
-			// var examplesent = $('<div/>').addClass('example-sent').html(exSent).appendTo(example);
-
-			var quoteright = $('<div/>').addClass('quoteright').appendTo(item_example_container);
-			$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
-
-			item.after(item_example);
-
-			// toggle example
-			item.find('.item-example').find('img').toggleClass('hide');
-			item_example.toggleClass('hide');
 		});		
 	}else
 	{
@@ -152,31 +148,53 @@ $('.entry-example').find('img').live('click',function(){
 
 	var entry = $(this).parents('.entry');
 	var next = entry.next();
+	var ngramText = entry.find('.entry-ngram').text();
+
 	// check if example fetched
 	if(!next.hasClass('example-container'))
 	{
 		// not fetched, i.e., example not exists
 		// fetch example
 		// $.get()....
+		$('#search-loading').find('img').show(0);
+		var exRequest = $.ajax({
 
-		exSent = 'Farmers should <strong>cultivate</strong> their <strong>crops</strong> to get a good harvest.';
+			url: "examples/" + ngramText,
+			// url: 'static/A_beach.json',
+			type: "GET",
+			dataType: "json",
+		});
+		exRequest.done(function(data){
+			if(data.status)
+			{
+				// get example successfully
+				// construct html element
+				var example = $('<div/>').addClass('example-container hide');
+				var quoteleft = $('<div/>').appendTo(example);
+				$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
 
-		// get example successfully
-		// construct html element
-		var example = $('<div/>').addClass('example-container hide');
-		var quoteleft = $('<div/>').appendTo(example);
-		$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
+				var examplesent = $('<div/>').addClass('example-sent').html(data.sent).appendTo(example);
+				var quoteright = $('<div/>').appendTo(example);
+				$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
 
-		var examplesent = $('<div/>').addClass('example-sent').html(exSent).appendTo(example);
-		var quoteright = $('<div/>').appendTo(example);
-		$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
-		// insert the example
-		entry.after(example);
+				// insert the example
+				entry.after(example);
 
-
-		// toggle example
-		entry.find('.entry-example').find('img').toggleClass('hide');
-		example.toggleClass('hide');		
+				// toggle example
+				entry.find('.entry-example').find('img').toggleClass('hide');
+				example.toggleClass('hide');				
+			}else{
+				// 
+				// no sent
+				// 
+				entry.find('.entry-example').find('img').remove();
+			}
+		});
+		exRequest.complete(function(data){
+			$('#search-loading').find('img').hide(0);
+			if(data.readyState != 4){}
+		});
+		
 	}else
 	{
 		entry.find('.entry-example').find('img').toggleClass('hide');

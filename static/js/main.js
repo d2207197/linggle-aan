@@ -536,14 +536,14 @@ function _show_traditional_results(data)
 	$.each(data, function(i, obj){
 		
 		// obj.count
-		console.log(obj);
+		// console.log(obj);
 
 		var item = $("<tr/>").addClass('item').appendTo(result_container);
 
 		var item_ngram = $('<td/>').addClass('item-ngram').appendTo(item);
 
 		$('<div/>').addClass('item-ngram-text').html(obj.phrase).appendTo(item_ngram);
-		console.log(restore(obj.percent)*400)
+		// console.log(restore(obj.percent)*400)
 		$('<div/>').addClass('item-bar').css("width", restore(obj.percent)*400).appendTo(item_ngram);
 
 		var item_portion = $('<td/>').addClass('item-portion').text(obj.percent).appendTo(item);
