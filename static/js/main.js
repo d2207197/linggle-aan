@@ -412,8 +412,6 @@ function _clear_previous_results()
 	$('#cluster-tag-container').html('');
 	$('#clusters-container').html('');
 	$('#normal-result-container').html('');
-
-
 }
 
 /// fetch data from wujc, including cluster/tratitional results
