@@ -88,8 +88,8 @@ function attach_example_fetch_events()
             $('#search-loading').find('img').show(0);
             var exRequest = $.ajax({
 
-                // url: "examples/" + ngramText,
-                url: 'static/cultivate_relationships.json',
+                url: "examples/" + ngramText,
+                // url: 'static/cultivate_relationships.json',
                 type: "GET",
                 dataType: "json",
             });
