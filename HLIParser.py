@@ -91,10 +91,14 @@ def patternMaker(parseResult):
 		makupResult = ' '.join(P)
 
 	return makupResult
+
 def parser(tokens):
-	# print tokens
 	idx = {}
 	parseResult = {'type':'','data':''}
+	
+	if len(tokens) == 2 and tokens[0].lower() == 'describe':
+		tokens = ['how','to'] + tokens
+
 	if tokens[0] == 'which':
 
 		compare = ["",""];
@@ -132,7 +136,7 @@ def parser(tokens):
 
 
 
-	elif  tokens[0] == 'how':
+	elif tokens[0] == 'how':
 		# print tokens
 		idx['to'] = tokens.index('to') if 'to' in tokens else -1
 

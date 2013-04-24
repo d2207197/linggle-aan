@@ -13,7 +13,8 @@ var EXAMPLE = {
     "HLI": [
         "How to describe beach?", 
         // "Which is popular stay at home or stay to home?",
-        "Which one is better do research or conduct research?",
+        "Describe beach <span>cluster</span>",
+        // "Which one is better do research or conduct research?",
         // "Which expression is correct, go home or go to home?",
         "Which is correct, go home or go to home?",
         "What verb goes with an important role?",
