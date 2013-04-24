@@ -1,4 +1,4 @@
-#result-block-container { width: 800px; position: relative; margin: 0 auto;  }
+.result-container { width: 800px; position: relative; margin: 0 auto;  }
 #clusters-container {}
 
 /*---------------------------- Cluster ----------------------------*/
@@ -47,6 +47,3 @@
 .tag-text {padding-right: 8px;}
 .tag-text .tag-text-count { padding-left: 3px; padding-left: 3px; font-size: smaller; opacity: 0.85;}
 
-
-#c1 {}
-#c2 {}

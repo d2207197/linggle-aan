@@ -80,6 +80,72 @@ function _show_clustering_results(data)
 	
 }
 
+///
+/// Handle the example expand/shrink events for traditional results
+///
+$('.item-example').find('img').live('click',function(){
+	var item = $(this).parents('.item');
+	var next = item.next();
+	var ngramText = item.find('.item-ngram-text').text()
+
+
+
+	if(!next.hasClass('item-example-container'))
+	{
+		$('#search-loading').find('img').show(0);
+
+		var exRequest = $.ajax({
+
+			url: "examples/" + ngramText,
+			// url: 'static/A_beach.json',
+			type: "GET",
+			beforeSend: function(){
+				
+			}
+		});
+		exRequest.complete(function(data){
+			$('#search-loading').find('img').hide(0);
+
+			if(data.readyState != 4)
+			{
+				return false;
+				
+			}
+			// exSent = 'A beatiful<strong>sandy</strong>beach ';
+			// exSent = 'Madeira lacks good beaches, but Porto Santo has a four-mile-long sandy beach, the island\'s major attraction.For swimming, there is Plattwood Park, Deep River\'s fresh water lake with a sandy beach, or, as little as 15 minutes away, Long Island Sound beaches in Westbrook and Madison.';
+			exSent = data.responseText;
+
+			var item_example = $('<tr/>').addClass('item-example-container hide');
+			var item_example_container = $('<td/>').attr('colspan',4).appendTo(item_example);
+
+			// var example = $('<div/>').addClass('example-container').appendTo(item_example_container);
+
+			var quoteleft = $('<div/>').addClass('quoteleft').appendTo(item_example_container);
+			$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
+
+			$('<div/>').addClass('example-sent-new').text(exSent).appendTo(item_example_container);
+
+			// var examplesent = $('<div/>').addClass('example-sent').html(exSent).appendTo(example);
+
+			var quoteright = $('<div/>').addClass('quoteright').appendTo(item_example_container);
+			$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
+
+			item.after(item_example);
+
+			// toggle example
+			item.find('.item-example').find('img').toggleClass('hide');
+			item_example.toggleClass('hide');
+		});		
+	}else
+	{
+		item.find('.item-example').find('img').toggleClass('hide');
+		next.toggleClass('hide');
+	}
+});
+
+///
+/// Handle the example expand/shrink events for cluster results
+///
 $('.entry-example').find('img').live('click',function(){
 
 	// console.log('trigger example.');
@@ -93,13 +159,15 @@ $('.entry-example').find('img').live('click',function(){
 		// fetch example
 		// $.get()....
 
+		exSent = 'Farmers should <strong>cultivate</strong> their <strong>crops</strong> to get a good harvest.';
+
 		// get example successfully
 		// construct html element
 		var example = $('<div/>').addClass('example-container hide');
 		var quoteleft = $('<div/>').appendTo(example);
 		$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
 
-		var examplesent = $('<div/>').addClass('example-sent').html('Farmers should <strong>cultivate</strong> their <strong>crops</strong> to get a good harvest.').appendTo(example);
+		var examplesent = $('<div/>').addClass('example-sent').html(exSent).appendTo(example);
 		var quoteright = $('<div/>').appendTo(example);
 		$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
 		// insert the example
