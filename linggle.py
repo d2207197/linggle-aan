@@ -244,13 +244,13 @@ def query(query):
                 ##開始排序　取出 label
                 Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
                 print Detailed_Cluster
-                if len(Detailed_Cluster) > 0: ##有查到字才留
+                if len(Detailed_Cluster) > 1: ##有查到字才留
                     ##進行格式化
                     now_datas = {}
                     now_datas['count'] = cluster_cnt
                     now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
                     now_datas['tag'] = Detailed_Cluster[0][0].upper()
-                    temp_data = [(query_in[0]+" "+data[0],ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
+                    temp_data = [(query_in[0]+" <strong>"+data[0]+'</strong>',ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
                     now_datas['data'] = temp_data
                     
                     Result_Clusters.append(now_datas)
