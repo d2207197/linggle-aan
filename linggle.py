@@ -105,22 +105,22 @@ def sentence(sent):
 @app.route('/examples/<ngram>')
 def examples(ngram):
     try:
-        return_data = {'status':True, 'sent':get_Examples(ngram)}
+        examples = get_Examples(ngram)
     except:
         logger.error('example fetch error')
-        return_data = {'status':False, 'sent':''}
+
+    choosed = [example.strip() for example in examples if len(example.strip().split()) > 5]
+    
+    return_data = {'status':True, 'sent':choosed } if len(choosed) > 0 else {'status':False, 'sent':None }
+    
     return Response(json.dumps(return_data), mimetype='application/json')
 
 @app.route('/API/<query>')
 def APIquery(query):
     query_in = query.replace("_"," ")
     # query_in = request.GET.get('query')
-    logger.debug('=' * 20)
-    logger.debug('get the request: ' + str(query_in))
-
-    # print '=' * 20
-    # print "get the request", ctime()
-    # print "ori = ", query_in
+    # logger.debug('=' * 20)
+    logger.debug('# GET THE QUERY: "' + str(query_in)+ '"')
 
     query_in = " ".join(query_in.replace("%20", " ").split())
 
@@ -130,10 +130,10 @@ def APIquery(query):
 
         ##先檢查是否屬於all star狀況
         if checkIfallStar(query_in):  # 是的話特別處理
-            print "All Star!!!"
+            # print "All Star!!!"
             ##檢查是否有任何一個token是屬於alternative 拆解之(若有多個 拆比較少的那一個)
             new_queries = similar_query_split(query_in)
-            print new_queries
+            # print new_queries
             if len(new_queries) > 0:  # 成功轉換
                 for query in new_queries:
                     Search_Result_temp = getSearchResults_Inside(query)
@@ -141,7 +141,7 @@ def APIquery(query):
                     Search_Result.extend(Search_Result_temp)
 
         else:
-            print "not all star"
+            # print "not all star"
             if query_in.count("?") + query_in.count("...") == 0:  # 直接處理
                 Search_Result = getSearchResults_Inside(query_in)
             else:
@@ -189,8 +189,7 @@ def query(query):
 
     query_in = query
     
-    logger.debug('=' * 20)
-    logger.debug('get the request: ' + str(query_in))
+    logger.debug('# GET THE QUERY: "' + str(query_in)+ '"')
 
     query_words = " ".join(query_in.replace("%20", " ").split())
     query_in = query_words.split()
@@ -245,7 +244,7 @@ def query(query):
                 if len(Detailed_Cluster) > 1:
                     ## 開始排序, 取出 label
                     Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
-                    print Detailed_Cluster
+                    # print Detailed_Cluster
                     if len(Detailed_Cluster) > 0: ## 有查到字才留
                         ## 進行格式化
                         now_datas = {}
@@ -256,19 +255,6 @@ def query(query):
                         now_datas['data'] = temp_data
                         
                         Result_Clusters.append(now_datas)
-                # ##開始排序　取出 label
-                # Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
-                # print Detailed_Cluster
-                # if len(Detailed_Cluster) > 1: ##有查到字才留
-                #     ##進行格式化
-                #     now_datas = {}
-                #     now_datas['count'] = cluster_cnt
-                #     now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
-                #     now_datas['tag'] = Detailed_Cluster[0][0].upper()
-                #     temp_data = [(query_in[0]+" <strong>"+data[0]+'</strong>',ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
-                #     now_datas['data'] = temp_data
-                    
-                #     Result_Clusters.append(now_datas)
 
             Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
 
@@ -281,10 +267,10 @@ def query(query):
             query_in = query_words
             ##先檢查是否屬於all star狀況
             if checkIfallStar(query_in):  # 是的話特別處理
-                print "All Star!!!"
+                # print "All Star!!!"
                 ##檢查是否有任何一個token是屬於alternative 拆解之(若有多個 拆比較少的那一個)
                 new_queries = similar_query_split(query_in)
-                print new_queries
+                # print new_queries
                 if len(new_queries) > 0:  # 成功轉換
                     for query in new_queries:
                         Search_Result_temp = getSearchResults_Inside(query)

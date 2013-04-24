@@ -212,65 +212,13 @@ function events()
 	$("#CMD-img").click(function(){
 		redirect("", "CMD");
 	});
-	
 
+	// EXAMPLE EVENTS
+	attach_example_fetch_events();
 
-	// EXAMPLE SENTENCE EVENT
-	$(".expand-example").live('click',function(e){
+	// CLUSTER TAG EVENT
+	attach_cluster_tag_event();
 
-
-		console.log('trigger expand examples')
-
-		var ngramText = $(this).parents(".ngram").find(".phrase-container").find(".text").text();
-		var anchor = $(this);
-		var exRequest = $.ajax({
-		    url: "examples/" + ngramText,
-		    // dataType: "json",
-		    // data:"ngram="+ngramText,
-		    type: "GET",
-		    // timeout: SENT_SERVICE_TIMEOUT // reset timeout!!!!
-
-		    // success: function(data) {
-
-		    // 	console.log('examples:',data);
-		    // 	// console.log(exampleSents);
-		    // 	// var exSents = exampleSents.Examples;
-
-		    // 	// fillExampleSents(exSents, anchor, ngramText);
-
-
-		    // 	// alert(ngram)
-
-		    // },
-		    // complete: function(data) {
-		    // 	// console.log(data)
-		    // },
-		    // error: function(x, t, m) { if(t==="timeout") {/*console.log("got timeout");*/} else {/*console.log(t);*/} }
-		});
-
-		// exRequest.done(function(recv){
-		// 	console.log(exRequest);
-		// 	console.log('done:',recv)
-		// });
-		exRequest.always(function(data){
-			if(data.readyState == 4)
-			{
-				if(data.responseText)
-				{	
-					exSents = data.responseText;
-					// fillExampleSents(exSents, anchor, ngramText);
-				}	
-			}
-		});
-
-		e.stopPropagation(); // prevent trigger parent event, or may cause loop trigger
-	});
-	$(".note-container").live("click",function(){
-		// if(EXAMPLE_SENT == 'on'){
-			// alert("XD");
-			$(this).parent().find(".expand-example").click();
-		// }
-	});
 	$(".ngram").live("click",function(){
 		$(this).find(".expand-example").click();
 	});
