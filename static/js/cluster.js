@@ -1,7 +1,7 @@
 var THRESHOLD = 5;
 var AutoOnTopK = 3;
 
-function _extract_cluster(data)
+function _show_clustering_results(data)
 {
 	var cluster_container = $('#clusters-container');
 	// cluster_container.html('');
@@ -9,7 +9,7 @@ function _extract_cluster(data)
 	$.each(data, function(cidx, c){
 		// get cluster label, e.g., relationship
 		var members = c.data;
-		
+		// console.log('members',members);
 		
 		var cid = 'c' + (k).toString();
 		if(k % 2 == 0)cluster_theme = 'cluster-even';
@@ -61,7 +61,7 @@ function _extract_cluster(data)
 
 		// add the (more) item
 		// console.log(entry_wrap.find('.entry').length);
-		console.log();
+		// console.log();
 		if(entry_wrap.find('.entry').length >= THRESHOLD)
 		{
 			var more_wrap = $('<div/>').addClass('more-wrap').appendTo(cluster);
@@ -80,58 +80,121 @@ function _extract_cluster(data)
 	
 }
 
-function _test_cluster()
-{
-	// get cluster data from wujc
-	// $.each() ...
-	// ...
-	var getCluster = $.ajax({
-		url: "static/cultivate_N.json",
-  		// url: "static/go_home.json",
-  		type: "get",
-  		dataType: "json"
-	});
-	getCluster.done(function(recv){
-		var mode = recv[0];
-		var data = recv[1];
-		if(mode == 'new'){
-			_extract_cluster(data);
-		}else if(mode == 'old'){
-		}
-	});
-	getCluster.fail(function(){});
-	getCluster.always(function(){});
-}
+///
+/// Handle the example expand/shrink events for traditional results
+///
+$('.item-example').find('img').live('click',function(){
+	var item = $(this).parents('.item');
+	var next = item.next();
+	var ngramText = item.find('.item-ngram-text').text()
 
+	if(!next.hasClass('item-example-container'))
+	{
+		$('#search-loading').find('img').show(0);
+
+		var exRequest = $.ajax({
+			url: "examples/" + ngramText,
+			type: "GET",
+			dataType: "json",
+		});
+		exRequest.done(function(data){
+			if(data.status)
+			{
+				// console.log(data);
+				var item_example = $('<tr/>').addClass('item-example-container hide');
+				var item_example_container = $('<td/>').attr('colspan',4).appendTo(item_example);
+				var quoteleft = $('<div/>').addClass('quoteleft').appendTo(item_example_container);
+
+				$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
+				$('<div/>').addClass('example-sent-new').text(data.sent).appendTo(item_example_container);
+
+				var quoteright = $('<div/>').addClass('quoteright').appendTo(item_example_container);
+				$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
+
+				item.after(item_example);
+
+				// toggle example
+				item.find('.item-example').find('img').toggleClass('hide');
+				item_example.toggleClass('hide');				
+			}else{
+				entry.find('.item-example').find('img').remove();
+			}
+		});
+		exRequest.complete(function(data){
+			$('#search-loading').find('img').hide(0);
+
+			if(data.readyState != 4)
+			{
+				// return false;
+				
+			}else{
+
+
+			}
+		});		
+	}else
+	{
+		item.find('.item-example').find('img').toggleClass('hide');
+		next.toggleClass('hide');
+	}
+});
+
+///
+/// Handle the example expand/shrink events for cluster results
+///
 $('.entry-example').find('img').live('click',function(){
 
 	// console.log('trigger example.');
 
 	var entry = $(this).parents('.entry');
 	var next = entry.next();
+	var ngramText = entry.find('.entry-ngram').text();
+
 	// check if example fetched
 	if(!next.hasClass('example-container'))
 	{
 		// not fetched, i.e., example not exists
 		// fetch example
 		// $.get()....
+		$('#search-loading').find('img').show(0);
+		var exRequest = $.ajax({
 
-		// get example successfully
-		// construct html element
-		var example = $('<div/>').addClass('example-container hide');
-		var quoteleft = $('<div/>').appendTo(example);
-		$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
+			url: "examples/" + ngramText,
+			// url: 'static/A_beach.json',
+			type: "GET",
+			dataType: "json",
+		});
+		exRequest.done(function(data){
+			if(data.status)
+			{
+				// get example successfully
+				// construct html element
+				var example = $('<div/>').addClass('example-container hide');
+				var quoteleft = $('<div/>').appendTo(example);
+				$('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
 
-		var examplesent = $('<div/>').addClass('example-sent').html('Farmers should <strong>cultivate</strong> their <strong>crops</strong> to get a good harvest.').appendTo(example);
-		var quoteright = $('<div/>').appendTo(example);
-		$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
-		// insert the example
-		entry.after(example);
+				var examplesent = $('<div/>').addClass('example-sent').html(data.sent).appendTo(example);
+				var quoteright = $('<div/>').appendTo(example);
+				$('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);	
 
+				// insert the example
+				entry.after(example);
 
-		// toggle example
-		entry.find('.entry-example').find('img').toggleClass('hide');
-		example.toggleClass('hide');		
+				// toggle example
+				entry.find('.entry-example').find('img').toggleClass('hide');
+				example.toggleClass('hide');				
+			}else{
+				// 
+				// no sent
+				// 
+				entry.find('.entry-example').find('img').remove();
+			}
+		});
+		exRequest.complete(function(data){
+			$('#search-loading').find('img').hide(0);
+			if(data.readyState != 4){}
+		});
+		
 	}else
 	{
 		entry.find('.entry-example').find('img').toggleClass('hide');

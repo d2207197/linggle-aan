@@ -104,7 +104,14 @@ def sentence(sent):
 
 @app.route('/examples/<ngram>')
 def examples(ngram):
-    return Response(get_Examples(ngram), mimetype='application/json')
+    try:
+        return_data = {'status':True, 'sent':get_Examples(ngram)}
+    except:
+        ## 
+        logger.error('example fetch error')
+        return_data = {'status':False, 'sent':''}
+
+    return Response(json.dumps(return_data), mimetype='application/json')
 
 @app.route('/API/<query>')
 def APIquery(query):
@@ -235,6 +242,7 @@ def query(query):
                         for collocate in collocates_dic[word]:
                             cluster_cnt += collocate[1]
                             Detailed_Cluster.append((collocate[0],collocate[1]))
+<<<<<<< HEAD
 
                 ##如果 Cluster 裡面超過 1 個字才呈現這個 cluster
                 if len(Detailed_Cluster) > 1:
@@ -251,6 +259,21 @@ def query(query):
                         now_datas['data'] = temp_data
                         
                         Result_Clusters.append(now_datas)
+=======
+                ##開始排序　取出 label
+                Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
+                print Detailed_Cluster
+                if len(Detailed_Cluster) > 1: ##有查到字才留
+                    ##進行格式化
+                    now_datas = {}
+                    now_datas['count'] = cluster_cnt
+                    now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
+                    now_datas['tag'] = Detailed_Cluster[0][0].upper()
+                    temp_data = [(query_in[0]+" <strong>"+data[0]+'</strong>',ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
+                    now_datas['data'] = temp_data
+                    
+                    Result_Clusters.append(now_datas)
+>>>>>>> cluster
 
             Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
 
