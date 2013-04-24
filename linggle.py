@@ -242,7 +242,7 @@ def query(query):
                         for collocate in collocates_dic[word]:
                             cluster_cnt += collocate[1]
                             Detailed_Cluster.append((collocate[0],collocate[1]))
-<<<<<<< HEAD
+# <<<<<<< HEAD
 
                 ##如果 Cluster 裡面超過 1 個字才呈現這個 cluster
                 if len(Detailed_Cluster) > 1:
@@ -259,7 +259,7 @@ def query(query):
                         now_datas['data'] = temp_data
                         
                         Result_Clusters.append(now_datas)
-=======
+# =======
                 ##開始排序　取出 label
                 Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
                 print Detailed_Cluster
@@ -273,7 +273,7 @@ def query(query):
                     now_datas['data'] = temp_data
                     
                     Result_Clusters.append(now_datas)
->>>>>>> cluster
+# >>>>>>> cluster
 
             Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
 
