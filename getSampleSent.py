@@ -56,7 +56,7 @@ def getSamples(query):
             else:
                 SQL = "select sentence from %s_Samples where sent_id == %s" % (Corpus,records[0])                
                 sentence = " "+cursor.execute(SQL).fetchone()[0]+" "
-                sentence = sentence.replace(" "+query+" "," <strong>"+query+"</strong> ")
+                sentence_candidate = sentence.replace(" "+query+" "," <strong>"+query+"</strong> ")
                 return {"status": 'ok', "sent": sentence_candidate[1:-1], "source": Corpus}
             
         return {"status": 'empty', "sent": "", "source": ""}
@@ -89,13 +89,12 @@ def getSamples(query):
                 ##unigram都存在 開始取交集
                 Records_List = [data.strip().split() for data in Records_List]
                 Records_List.sort(key = lambda x:len(x))
-                ##少的在前，後面的轉字典 比較速度較快
+                ##利用 set 取交集比字典快
                 temp_list = Records_List[0]
                 for i in range(2,len(Records_List)):
-                    if len(Records_List[i]) > 100000: ##太多句子有  就不要過濾了  很容易碰到
+                    if len(Records_List[i]) > 500000: ##太多句子有  就不要過濾了  很容易碰到
                         continue
-                    
-                    temp_list = [data for data in temp_list if data in dict([(data2,True) for data2 in Records_List[i]])]
+                    temp_list = list(set(temp_list) & set(Records_List[i]))
                     if len(temp_list) == 0: ##找不到有重疊的機會
                         break
 
@@ -103,7 +102,7 @@ def getSamples(query):
                 if len(temp_list) == 0:
                     continue ##找下一個 Corpus
                 else: ##開始尋找是否真的包含該 ngram
-                    for sent_id in temp_list[:100000]:
+                    for sent_id in temp_list[:10000]:
                         SQL = "select sentence from %s_Samples where sent_id == %s" % (Corpus,sent_id)
                         sentence_candidate = " "+cursor.execute(SQL).fetchone()[0]+" "
                         if sentence_candidate.count(" "+query+" ") > 0:
