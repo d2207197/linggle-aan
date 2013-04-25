@@ -7,11 +7,13 @@ from time import ctime
 import pickle
 import logging
 # from examples import get_Examples
-from getSampleSent import getSamples
+# from getSampleSent import getSamples
+import getSampleSent
 from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
 import HLIParser
 from query import checkIfallStar, similar_query_split, getSearchResults_Inside, query_extend
+from urllib import unquote
 
 DATABASE = 'linggle.db3'
 DEBUG = True
@@ -43,6 +45,12 @@ vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick'
 #ov_clusters_dic = pickle.loads(open('cluster_ov_large.pick','r').read())
 
 lemmatizer = WordNetLemmatizer()
+
+
+
+
+
+    # return conn,cursor
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
@@ -105,16 +113,21 @@ def sentence(sent):
 
 @app.route('/examples/<ngram>')
 def examples(ngram):
-    try:
-        examples = getSamples(ngram)
-        status = examples['status']
-        source = examples['source']
-        sent = examples['sent']
 
-    except:
-        logger.error('example fetch error')
+    LinggleSamplesConn = sqlite3.connect("/corpus/Linggle/LinggleSamples.db3")
+    cur = LinggleSamplesConn.cursor()
+    examples = getSampleSent.getSamples(str(unquote(ngram)), cur)
+    print 'examples',examples
+    status = examples['status']
+    source = examples['source']
+    sent = examples['sent']
+    # except:
+    # logger.error('example fetch error')
 
     return_data = {'status':status, 'sent':sent, 'source':source }
+
+    cur.close()
+    LinggleSamplesConn.close()
     
     return Response(json.dumps(return_data), mimetype='application/json')
 

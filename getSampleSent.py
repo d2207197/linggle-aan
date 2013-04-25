@@ -18,8 +18,8 @@ import sys
 ##==================================================
 print ctime()
 from nltk.corpus import stopwords
-conn = sqlite.connect("/corpus/Linggle/LinggleSamples.db3")
-cursor = conn.cursor()
+# conn = sqlite.connect("/corpus/Linggle/LinggleSamples.db3")
+# cursor = conn.cursor()
 Corpus_List = ["BNC","NYT"]
 
 Eng_stops = dict([(word,1) for word in list(set(stopwords.words('english')))])
@@ -34,13 +34,15 @@ Eng_stops = dict([(word,1) for word in list(set(stopwords.words('english')))])
 ##further their if again no when same any how other which you who most such why a don i
 ##having so the yours once'
 
-def getSamples(query):
+def getSamples(query, cursor):
 
-    query = query.strip()       
+    print 'input:',query
+    query = query.strip()
+
     words = query.split()
-
+    print 'words:',words
     if len(words) == 1:
-
+        print '1'
         for Corpus in Corpus_List:
             SQL = "select sent_ids from %s_Ngram1_IL where ngram == '%s'" % (Corpus,query.replace("'","''"))
             try:
@@ -62,29 +64,33 @@ def getSamples(query):
         return {"status": 'empty', "sent": "", "source": ""}
 
     else: ##超過2個字 就用組合搜尋       
-        
+        print '>2'
         for Corpus in Corpus_List:
 
             Records_List = []##記錄
 
             words = [word for word in words if word.lower() not in Eng_stops]
             #print "===>" ,words
+            print 'new words: ', words
 
             if len(words) == 0:
                 return {"status": 'stopword', "sent": '', "source": ''}
            
             for i in range(len(words)):
                 subquery = words[i]
+                print 'subquery:',subquery
                 if subquery not in Eng_stops: ##不是 stop words才處理，是的話，應該很容易碰到
                     SQL = "select sent_ids from %s_Ngram1_IL where ngram == '%s'" % (Corpus,subquery.replace("'","''"))
-                    try:
-                        records = cursor.execute(SQL).fetchone()[0]
-                    except:
-                        Records_List = []
-                        break ##找下一個 corpus
+                    # try:
+                    records = cursor.execute(SQL).fetchone()[0]
+                    # except:
+
+                    Records_List = []
+                    # break ##找下一個 corpus
 
                 Records_List.append(records)
 
+            # print 'Records_List:',Records_List
             if len(Records_List) > 0:
                 ##unigram都存在 開始取交集
                 Records_List = [data.strip().split() for data in Records_List]
@@ -109,6 +115,7 @@ def getSamples(query):
                             sentence_candidate = sentence_candidate.replace(" "+query+" "," <strong>"+query+"</strong> ")
                             return {"status": 'ok', "sent": sentence_candidate[1:-1], "source": Corpus}
         ##都找完了 沒有找到
+        print 'empty'
         return {"status": 'empty', "sent": "", "source": ""}
 if __name__ == "__main__":
     while True:
