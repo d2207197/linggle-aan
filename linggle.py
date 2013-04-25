@@ -6,7 +6,7 @@ from contextlib import closing
 from time import ctime
 import pickle
 import logging
-from examples import get_Examples
+from getSampleSent import getSamples
 from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
 import HLIParser
@@ -104,15 +104,8 @@ def sentence(sent):
 
 @app.route('/examples/<ngram>')
 def examples(ngram):
-    try:
-        examples = get_Examples(ngram)
-    except:
-        logger.error('example fetch error')
-
-    choosed = [example.strip() for example in examples if len(example.strip().split()) > 5]
-    
-    return_data = {'status':True, 'sent':choosed } if len(choosed) > 0 else {'status':False, 'sent':None }
-    
+    ngram = ngram.replace("%20"," ")
+    return_data = getSamples(ngram)    
     return Response(json.dumps(return_data), mimetype='application/json')
 
 @app.route('/API/<query>')
@@ -346,7 +339,7 @@ if __name__ == '__main__':
         "-d", "--debug", action="store_true", dest="debug_mode",
         help="run in debug mode", default=False)
     parser.add_argument("-p", "--port", dest="port",
-                        help="port of server (default:%(default)s)", type=int, default=5000)
+                        help="port of server (default:%(default)s)", type=int, default=5001)
 
     cmd_args = parser.parse_args()
     app_options = {"port": cmd_args.port, 'host':'0.0.0.0'}
