@@ -18,9 +18,9 @@ function attach_example_fetch_events()
                 dataType: "json",
             });
             exRequest.done(function(data){
-                if(data.status)
+                if(data.status == 'ok')
                 {
-                    var sent = data.sent[0];
+                    var sent = data.sent;
 
                     if($.trim(sent) == '')
                     {
@@ -90,11 +90,11 @@ function attach_example_fetch_events()
                 dataType: "json",
             });
             exRequest.done(function(data){
-                if(data.status)
+                if(data.status == 'ok')
                 {
                     // get example successfully
                     // construct html element
-                    var sent = data.sent[0];
+                    var sent = data.sent;
 
                     if($.trim(sent) == '')
                     {

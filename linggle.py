@@ -6,6 +6,7 @@ from contextlib import closing
 from time import ctime
 import pickle
 import logging
+# from examples import get_Examples
 from getSampleSent import getSamples
 from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
@@ -104,8 +105,17 @@ def sentence(sent):
 
 @app.route('/examples/<ngram>')
 def examples(ngram):
-    ngram = ngram.replace("%20"," ")
-    return_data = getSamples(ngram)    
+    try:
+        examples = getSamples(ngram)
+        status = examples['status']
+        source = examples['source']
+        sent = examples['sent']
+
+    except:
+        logger.error('example fetch error')
+
+    return_data = {'status':status, 'sent':sent, 'source':source }
+    
     return Response(json.dumps(return_data), mimetype='application/json')
 
 @app.route('/API/<query>')
@@ -339,7 +349,7 @@ if __name__ == '__main__':
         "-d", "--debug", action="store_true", dest="debug_mode",
         help="run in debug mode", default=False)
     parser.add_argument("-p", "--port", dest="port",
-                        help="port of server (default:%(default)s)", type=int, default=5001)
+                        help="port of server (default:%(default)s)", type=int, default=5000)
 
     cmd_args = parser.parse_args()
     app_options = {"port": cmd_args.port, 'host':'0.0.0.0'}
