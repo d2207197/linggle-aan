@@ -16,8 +16,6 @@ function attach_example_fetch_events()
         {
             if(!EXAMPLE_REQUEST_LOCK)
             {
-
-            
                 $('#search-loading').find('img').show(0);
 
                 EXAMPLE_REQUEST_LOCK = true;
@@ -60,6 +58,8 @@ function attach_example_fetch_events()
                 });
                 exRequest.complete(function(data){
                     $('#search-loading').find('img').hide(0);
+                    // release lock
+                    EXAMPLE_REQUEST_LOCK = false;
 
                     if(data.readyState != 4 || data.status != 200)
                     {
