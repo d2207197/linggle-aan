@@ -51,7 +51,7 @@ function init() // a page load (ajax)
 
 	layout();						// set layout
 	exampleHandler(EXAMPLE_STATE);	// example show/hide
-
+	
 	// console.log(test());
 }
 function adjustBrowser()
@@ -331,23 +331,7 @@ function choose(idx)
 	var query = _target.find(".option").html().split("<span>")[0];
 	$("#search-bar").val(query);
 }
-// function getExampleSent(ngram)
-// {
-// 	$.ajax({
-// 	    url: "examples/",
-// 	    dataType: "json",
-// 	    data:"ngram="+ngram,
-// 	    type: "GET",
-// 	    timeout: SENT_SERVICE_TIMEOUT, // reset timeout!!!!
-// 	    success: function(exampleSents) {
-// 	    	alert(exampleSents);
-// 	    	// fetch_worker(server, query);
 
-// 	    },
-// 	    complete: function(data) {},
-// 	    error: function(x, t, m) { if(t==="timeout") {/*console.log("got timeout");*/} else {/*console.log(t);*/} }
-// 	});
-// }
 function showMsg(msg)
 {
 	var tr = $("<tr/>").addClass("block").appendTo($("#result-block"));
@@ -465,7 +449,6 @@ function query()
 		    success: function(query) {
 		    	// fetch result using command query
 		    	fetch_worker(server, query);
-
 		    },
 		    complete: function(data) {},
 		    error: function(x, t, m) { if(t==="timeout") {/*console.log("got timeout");*/} else {/*console.log(t);*/} }
@@ -480,16 +463,12 @@ function _show_traditional_results(data)
 	var result_container = $('#normal-result-container');
 
 	$.each(data, function(i, obj){
-		
-		// obj.count
-		// console.log(obj);
 
 		var item = $("<tr/>").addClass('item').appendTo(result_container);
 
 		var item_ngram = $('<td/>').addClass('item-ngram').appendTo(item);
 
 		$('<div/>').addClass('item-ngram-text').html(obj.phrase).appendTo(item_ngram);
-		// console.log(restore(obj.percent)*400)
 		$('<div/>').addClass('item-bar').css("width", restore(obj.percent)*400).appendTo(item_ngram);
 
 		var item_portion = $('<td/>').addClass('item-portion').text(obj.percent).appendTo(item);
@@ -566,7 +545,6 @@ function restore(p) // 89 % -> 0.89
 		return 0.01;
 	}
 }
-
 /// perform filling the bar with pre-defined delay
 function _bar_animater(delay)
 {

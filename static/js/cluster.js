@@ -73,7 +73,7 @@ function _show_clustering_results(data)
 			obj.click();	
 		}
 	});
-	
+	// check_style();
 }
 
 function attach_cluster_tag_event()
@@ -92,7 +92,10 @@ function attach_cluster_tag_event()
 			if(i % 2 == 0)cluster_theme = 'cluster-even';
 			else cluster_theme = 'cluster-odd';
 
-			$('#'+idx).removeClass('hide cluster-even cluster-odd').addClass(cluster_theme);
+			var isMacLike = navigator.userAgent.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
+
+			if(isMacLike)cluster_theme = cluster_theme + '-apple';
+			$('#'+idx).removeClass('hide cluster-even cluster-odd cluster-even-apple cluster-odd-apple').addClass(cluster_theme);
 		})
 	});
 }

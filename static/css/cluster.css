@@ -3,8 +3,13 @@
 
 /*---------------------------- Cluster ----------------------------*/
 .cluster {width: 760px; background: #444; margin: 0 auto; margin-bottom:32px; border-radius:8px; border: 1px solid #DDD; box-shadow: 2px 2px 6px 0px #AAA;}
-.cluster-odd  {background: #fdfeb0;}
-.cluster-even {background: #c8fea9;}
+
+.cluster-odd  {background: #eedd83;}
+.cluster-even {background: #99f08a;}
+
+.cluster-odd-apple  	{background: #fdfeb0!important;}
+.cluster-even-apple {background: #c8fea9!important;}
+
 /*.cluster:nth-child(even) {background: #c8fea9;}
 .cluster:nth-child(odd) {background: #fdfeb0;}*/
 .cluster-label-container {height: 32px; line-height: 32px; color:#666; position: relative;}

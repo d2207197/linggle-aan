@@ -51,13 +51,9 @@ function attach_example_fetch_events()
             exRequest.complete(function(data){
                 $('#search-loading').find('img').hide(0);
 
-                if(data.readyState != 4)
+                if(data.readyState != 4 || data.status != 200)
                 {
-                    // return false;
-                    
-                }else{
-
-
+                    item.find('.item-example').find('img').remove();
                 }
             });     
         }else
@@ -94,7 +90,6 @@ function attach_example_fetch_events()
                 dataType: "json",
             });
             exRequest.done(function(data){
-
                 if(data.status)
                 {
                     // get example successfully
@@ -130,8 +125,11 @@ function attach_example_fetch_events()
                 }
             });
             exRequest.complete(function(data){
+                // console.log('data:',data);
                 $('#search-loading').find('img').hide(0);
-                if(data.readyState != 4){}
+                if(data.readyState != 4 || data.status != 200){
+                    entry.find('.entry-example').find('img').remove();
+                }
             });
             
         }else
