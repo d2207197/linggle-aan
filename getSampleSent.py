@@ -81,12 +81,12 @@ def getSamples(query, cursor):
                 print 'subquery:',subquery
                 if subquery not in Eng_stops: ##不是 stop words才處理，是的話，應該很容易碰到
                     SQL = "select sent_ids from %s_Ngram1_IL where ngram == '%s'" % (Corpus,subquery.replace("'","''"))
-                    # try:
-                    records = cursor.execute(SQL).fetchone()[0]
-                    # except:
+                    try:
+                        records = cursor.execute(SQL).fetchone()[0]
+                    except:
 
-                    Records_List = []
-                    # break ##找下一個 corpus
+                        Records_List = []
+                        break ##找下一個 corpus
 
                 Records_List.append(records)
 
