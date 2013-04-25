@@ -6,7 +6,8 @@ from contextlib import closing
 from time import ctime
 import pickle
 import logging
-from examples import get_Examples
+# from examples import get_Examples
+from getSampleSent import getSamples
 from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
 import HLIParser
@@ -105,13 +106,15 @@ def sentence(sent):
 @app.route('/examples/<ngram>')
 def examples(ngram):
     try:
-        examples = get_Examples(ngram)
+        examples = getSamples(ngram)
+        status = examples['status']
+        source = examples['source']
+        sent = examples['sent']
+
     except:
         logger.error('example fetch error')
 
-    choosed = [example.strip() for example in examples if len(example.strip().split()) > 5]
-    
-    return_data = {'status':True, 'sent':choosed } if len(choosed) > 0 else {'status':False, 'sent':None }
+    return_data = {'status':status, 'sent':sent, 'source':source }
     
     return Response(json.dumps(return_data), mimetype='application/json')
 
