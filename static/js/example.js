@@ -92,56 +92,62 @@ function attach_example_fetch_events()
             // not fetched, i.e., example not exists
             // fetch example
             // $.get()....
-            $('#search-loading').find('img').show(0);
-            var exRequest = $.ajax({
+            if(!EXAMPLE_REQUEST_LOCK)
+            {
+                $('#search-loading').find('img').show(0);
+                var exRequest = $.ajax({
 
-                url: "examples/" + ngramText,
-                // url: 'static/cultivate_relationships.json',
-                type: "GET",
-                dataType: "json",
-            });
-            exRequest.done(function(data){
-                if(data.status == 'ok')
-                {
-                    // get example successfully
-                    // construct html element
-                    var sent = data.sent;
-
-                    if($.trim(sent) == '')
+                    url: "examples/" + ngramText,
+                    // url: 'static/cultivate_relationships.json',
+                    type: "GET",
+                    dataType: "json",
+                });
+                exRequest.done(function(data){
+                    if(data.status == 'ok')
                     {
-                        // pass
+                        // get example successfully
+                        // construct html element
+                        var sent = data.sent;
+
+                        if($.trim(sent) == '')
+                        {
+                            // pass
+                        }else{
+                            var example = $('<div/>').addClass('example-container hide');
+                            var quoteleft = $('<div/>').addClass('quoteleft-cluster').appendTo(example);
+                            $('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
+
+                            var examplesent = $('<div/>').addClass('example-sent').html(sent).appendTo(example);
+
+                            var quoteright = $('<div/>').addClass('quoteright-cluster').appendTo(example);
+                            $('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);  
+
+                            // insert the example
+                            entry.after(example);
+
+                            // toggle example
+                            entry.find('.entry-example').find('img').toggleClass('hide');
+                            example.toggleClass('hide');
+                        }
+                    
                     }else{
-                        var example = $('<div/>').addClass('example-container hide');
-                        var quoteleft = $('<div/>').addClass('quoteleft-cluster').appendTo(example);
-                        $('<img/>').attr('src','static/img/quote-left.png').appendTo(quoteleft);
-
-                        var examplesent = $('<div/>').addClass('example-sent').html(sent).appendTo(example);
-
-                        var quoteright = $('<div/>').addClass('quoteright-cluster').appendTo(example);
-                        $('<img/>').attr('src','static/img/quote-right.png').appendTo(quoteright);  
-
-                        // insert the example
-                        entry.after(example);
-
-                        // toggle example
-                        entry.find('.entry-example').find('img').toggleClass('hide');
-                        example.toggleClass('hide');
+                        // 
+                        // no sent
+                        // 
+                        entry.find('.entry-example').find('img').remove();
                     }
-                
-                }else{
-                    // 
-                    // no sent
-                    // 
-                    entry.find('.entry-example').find('img').remove();
-                }
-            });
-            exRequest.complete(function(data){
-                // console.log('data:',data);
-                $('#search-loading').find('img').hide(0);
-                if(data.readyState != 4 || data.status != 200){
-                    entry.find('.entry-example').find('img').remove();
-                }
-            });
+                });
+                exRequest.complete(function(data){
+                    // console.log('data:',data);
+
+                    $('#search-loading').find('img').hide(0);
+                    EXAMPLE_REQUEST_LOCK = false;
+                    if(data.readyState != 4 || data.status != 200){
+                        entry.find('.entry-example').find('img').remove();
+                    }
+                });
+            }
+
             
         }else
         {
