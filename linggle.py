@@ -40,10 +40,15 @@ for path in CLUSTER_ROOT:
     else:
         CLUSTER_ROOT_PATH = ''
 
+## POS dictionary
+BNC_POS_Dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'bncwordlemma.pick','r').read())
+
 ## clusters of objects for given VERB
 vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick','r').read()) 
 ## clusters of VERBs for given NOUN
 ov_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_ov_large.pick','r').read())
+## clusters of NOUN for given Adjective
+an_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_an_nouns.pick','r').read())
 
 #vs_clusters_dic = pickle.loads(open('cluster_vs_large.pick','r').read())
 
@@ -227,7 +232,7 @@ def query(query):
     if len(query_in) > 0:
 
         ##配合新版搭配詞功能，檢查是否符合特定搭配詞狀況
-        if len(query_in) == 2 and query_in[1] == "$N" and query_in[0].isalpha(): ##VN
+        if len(query_in) == 2 and query_in[1] in ["$N"] and query_in[0].isalpha(): ##VN or AN
             
             collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
             ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源           
@@ -238,7 +243,14 @@ def query(query):
                 total_no += data[1]
 
             ##取得 cluster 狀況
-            clusters = vo_clusters_dic[query_in[0]]            
+            ##跟據首字最有可能的詞性進行搜尋
+
+            POS_Candi = [data[1] for data in BNC_POS_Dic[query_in[0].lower()] if data[1] in "av"][0]
+            if POS_Candi == "a":                
+                clusters = an_clusters_dic[query_in[0]]
+            else:
+                clusters = vo_clusters_dic[query_in[0]]
+                
             Result_Clusters = []
             
             for cluster in clusters:
@@ -277,17 +289,19 @@ def query(query):
 
             Return_Result = ("new",Result_Clusters)            
 
-        elif len(query_in) == 2 and query_in[0] == "$V" and query_in[1].isalpha(): ##Verb for object
+        elif len(query_in) == 2 and query_in[0] in ["$V"] and query_in[1].isalpha(): ##Verb (or Adjective) for object
+            POS_Map_Dic = {"$V":{"POS":'v',"dic":ov_clusters_dic},"$A":{"POS":'a',"dic":an_clusters_dic}}
             collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
             ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源           
             collocates_dic = defaultdict(list)
             total_no = 0.0
             for data in collocates:
-                collocates_dic[lemmatizer.lemmatize(data[0][0],'v')].append((data[0][0],data[1]))
+                
+                collocates_dic[lemmatizer.lemmatize(data[0][0],POS_Map_Dic[query_in[0]]["POS"])].append((data[0][0],data[1]))
                 total_no += data[1]
 
             ##取得 cluster 狀況
-            clusters = ov_clusters_dic[query_in[1]]
+            clusters = POS_Map_Dic[query_in[0]]["dic"][query_in[1]]
             Result_Clusters = []
             
             for cluster in clusters:
