@@ -40,17 +40,15 @@ for path in CLUSTER_ROOT:
     else:
         CLUSTER_ROOT_PATH = ''
 
-vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick','r').read())
+## clusters of objects for given VERB
+vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick','r').read()) 
+## clusters of VERBs for given NOUN
+ov_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_ov_large.pick','r').read())
+
 #vs_clusters_dic = pickle.loads(open('cluster_vs_large.pick','r').read())
-#ov_clusters_dic = pickle.loads(open('cluster_ov_large.pick','r').read())
+
 
 lemmatizer = WordNetLemmatizer()
-
-
-
-
-
-    # return conn,cursor
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
@@ -278,6 +276,55 @@ def query(query):
                 cluster['count'] = ConvertFreq(cluster['count'])
 
             Return_Result = ("new",Result_Clusters)            
+
+        elif len(query_in) == 2 and query_in[0] == "$V" and query_in[1].isalpha(): ##Verb for object
+            collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
+            ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源           
+            collocates_dic = defaultdict(list)
+            total_no = 0.0
+            for data in collocates:
+                collocates_dic[lemmatizer.lemmatize(data[0][0],'v')].append((data[0][0],data[1]))
+                total_no += data[1]
+
+            ##取得 cluster 狀況
+            clusters = ov_clusters_dic[query_in[1]]
+            Result_Clusters = []
+            
+            for cluster in clusters:
+                Detailed_Cluster = []
+                cluster_cnt = 0.0
+                words = []
+                for sub_cluster in cluster:
+                    words.extend(sub_cluster)
+                ##取得個別字出現的次數
+                for word in words:
+                    if len(collocates_dic[word]) > 0:
+                        for collocate in collocates_dic[word]:
+                            cluster_cnt += collocate[1]
+                            Detailed_Cluster.append((collocate[0],collocate[1]))
+
+                ## 如果 Cluster 裡面超過 1 個字才呈現這個 cluster
+                if len(Detailed_Cluster) > 1:
+                    ## 開始排序, 取出 label
+                    Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
+                    # print Detailed_Cluster
+                    if len(Detailed_Cluster) > 0: ## 有查到字才留
+                        ## 進行格式化
+                        now_datas = {}
+                        now_datas['count'] = cluster_cnt
+                        now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
+                        now_datas['tag'] = Detailed_Cluster[0][0].upper()
+                        temp_data = [("<strong>"+data[0]+"</strong> "+query_in[1],ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
+                        now_datas['data'] = temp_data
+                        
+                        Result_Clusters.append(now_datas)
+
+            Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
+
+            for cluster in Result_Clusters:
+                cluster['count'] = ConvertFreq(cluster['count'])
+
+            Return_Result = ("new",Result_Clusters)                        
 
         else:##傳統查詢
             query_in = query_words
