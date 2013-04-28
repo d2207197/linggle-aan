@@ -356,7 +356,7 @@ def query(query):
 
             else:
                 new_queries = query_extend(query_in)
-                for query in new_queries:
+                for query in new_queries:                    
                     Search_Result_temp = getSearchResults_Inside(query)
                     ##將數次查詢的結果整合到一個資料庫中以便排序
                     Search_Result.extend(Search_Result_temp)

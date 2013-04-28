@@ -134,7 +134,7 @@ def getSearchResults_Inside(query_in):
             words = " ".join(data[0])
             freq = float(data[1])
             sim_word = data[0][sim_posi]
-            sim_score = word_filter[sim_posi][sim_word.replace('<strong">','').replace("</strong>","")]
+            sim_score = word_filter[sim_posi][sim_word.replace('<strong>','').replace("</strong>","")]
             Search_Result.append((words,freq,sim_score))
             
     return Search_Result   
