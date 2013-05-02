@@ -44,13 +44,15 @@ for path in CLUSTER_ROOT:
 BNC_POS_Dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'bncwordlemma.pick','r').read())
 
 ## clusters of objects for given VERB
-vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick','r').read()) 
+vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick','r').read())
 ## clusters of VERBs for given NOUN
 ov_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_ov_large.pick','r').read())
 ## clusters of NOUN for given Adjective
 an_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_an_nouns.pick','r').read())
-
-#vs_clusters_dic = pickle.loads(open('cluster_vs_large.pick','r').read())
+## clusters of Subject for given Verb
+vs_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vs_large.pick','r').read())
+## clusters of Verbs for given Subject
+sv_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_sv_large.pick','r').read())
 
 
 lemmatizer = WordNetLemmatizer()
@@ -81,14 +83,14 @@ def ConvertPercentage(percentage):
     if percentage < 1:
         percentage = " < 1%"
     else:
-        percentage = " %2.0f %%" % percentage    
+        percentage = " %2.0f %%" % percentage
     return percentage
 
 def ConvertFreq(freq):
     if int(freq) >= 100:
         freq_str = "{:,d}".format(int(freq) / 100 * 100)
     else:
-        freq_str = str(int(freq)).strip()    
+        freq_str = str(int(freq)).strip()
     return freq_str
 
 @app.before_request
@@ -131,7 +133,7 @@ def examples(ngram):
 
     cur.close()
     LinggleSamplesConn.close()
-    
+
     return Response(json.dumps(return_data), mimetype='application/json')
 
 @app.route('/API/<query>')
@@ -196,7 +198,7 @@ def APIquery(query):
 
         Return_Result.append((phrase.replace('<span class="SW">',"").replace("</span>",""),freq,percentage))
 
-    
+
     resp = Response(json.dumps(Return_Result), status=200, mimetype='application/json')
     return resp
 
@@ -207,7 +209,7 @@ def query(query):
     TRADITIONAL_RESULT_LIMIT = 100
 
     query_in = query
-    
+
     logger.debug('# GET THE QUERY: "' + str(query_in)+ '"')
 
     query_words = " ".join(query_in.replace("%20", " ").split())
@@ -232,78 +234,139 @@ def query(query):
     if len(query_in) > 0:
 
         ##配合新版搭配詞功能，檢查是否符合特定搭配詞狀況
-        if len(query_in) == 2 and query_in[1] in ["$N"] and query_in[0].isalpha(): ##VN or AN
-            
+        if len(query_in) == 2 and query_in[0].isalpha() and query_in[1] in ["$N","$V"]: ##VERB $N or ADJ $N or Sub $V
+            if query_in[1] == "$N": ##VERB $N or ADJ $N
+                collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
+                ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源
+                collocates_dic = defaultdict(list)
+                total_no = 0.0
+                for data in collocates:
+                    collocates_dic[lemmatizer.lemmatize(data[0][1],'n')].append((data[0][1],data[1]))
+                    total_no += data[1]
+
+                ##取得 cluster 狀況
+                ##跟據首字最有可能的詞性進行搜尋
+
+                POS_Candi = [data[1] for data in BNC_POS_Dic[query_in[0].lower()] if data[1] in "av"][0]
+
+                if POS_Candi == "a":
+                    clusters = an_clusters_dic[query_in[0]]
+                else:
+                    clusters = vo_clusters_dic[query_in[0]]
+
+                Result_Clusters = []
+
+                for cluster in clusters:
+                    Detailed_Cluster = []
+                    cluster_cnt = 0.0
+                    words = []
+                    for sub_cluster in cluster:
+                        words.extend(sub_cluster)
+                    ##取得個別字出現的次數
+                    for word in words:
+                        if len(collocates_dic[word]) > 0:
+                            for collocate in collocates_dic[word]:
+                                cluster_cnt += collocate[1]
+                                Detailed_Cluster.append((collocate[0],collocate[1]))
+
+                    ## 如果 Cluster 裡面超過 1 個字才呈現這個 cluster
+                    if len(Detailed_Cluster) > 1:
+                        ## 開始排序, 取出 label
+                        Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
+                        # print Detailed_Cluster
+                        if len(Detailed_Cluster) > 0: ## 有查到字才留
+                            ## 進行格式化
+                            now_datas = {}
+                            now_datas['count'] = cluster_cnt
+                            now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
+                            now_datas['tag'] = Detailed_Cluster[0][0].upper()
+                            temp_data = [(query_in[0]+" <strong>"+data[0]+"</strong>",ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
+                            now_datas['data'] = temp_data
+
+                            Result_Clusters.append(now_datas)
+
+                Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
+
+                for cluster in Result_Clusters:
+                    cluster['count'] = ConvertFreq(cluster['count'])
+
+                Return_Result = ("new",Result_Clusters)
+
+            elif query_in[1] == "$V": ##SUBJ $V
+                print "SUBJ_$V"
+                collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
+                ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源
+                collocates_dic = defaultdict(list)
+                total_no = 0.0
+                for data in collocates:
+                    collocates_dic[lemmatizer.lemmatize(data[0][1],'n')].append((data[0][1],data[1]))
+                    total_no += data[1]
+
+                clusters = sv_clusters_dic[query_in[0]]
+
+                Result_Clusters = []
+
+                for cluster in clusters:
+                    Detailed_Cluster = []
+                    cluster_cnt = 0.0
+                    words = []
+                    for sub_cluster in cluster:
+                        words.extend(sub_cluster)
+                    ##取得個別字出現的次數
+                    for word in words:
+                        if len(collocates_dic[word]) > 0:
+                            for collocate in collocates_dic[word]:
+                                cluster_cnt += collocate[1]
+                                Detailed_Cluster.append((collocate[0],collocate[1]))
+
+                    ## 如果 Cluster 裡面超過 1 個字才呈現這個 cluster
+                    if len(Detailed_Cluster) > 1:
+                        ## 開始排序, 取出 label
+                        Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
+                        # print Detailed_Cluster
+                        if len(Detailed_Cluster) > 0: ## 有查到字才留
+                            ## 進行格式化
+                            now_datas = {}
+                            now_datas['count'] = cluster_cnt
+                            now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
+                            now_datas['tag'] = Detailed_Cluster[0][0].upper()
+                            temp_data = [(query_in[0]+" <strong>"+data[0]+"</strong>",ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
+                            now_datas['data'] = temp_data
+
+                            Result_Clusters.append(now_datas)
+
+                Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
+
+                for cluster in Result_Clusters:
+                    cluster['count'] = ConvertFreq(cluster['count'])
+
+                Return_Result = ("new",Result_Clusters)
+
+        elif len(query_in) == 2 and query_in[0] in ["$V","$N"] and query_in[1].isalpha(): ##Verb (or Adjective) for object: $V NOUN
+            POS_Map_Dic = {"$N":{"POS":"n"},"$V":{"POS":'v'},"$A":{"POS":'a'}}
+            ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源
             collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
-            ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源           
+
             collocates_dic = defaultdict(list)
             total_no = 0.0
             for data in collocates:
-                collocates_dic[lemmatizer.lemmatize(data[0][1],'n')].append((data[0][1],data[1]))
-                total_no += data[1]
-
-            ##取得 cluster 狀況
-            ##跟據首字最有可能的詞性進行搜尋
-
-            POS_Candi = [data[1] for data in BNC_POS_Dic[query_in[0].lower()] if data[1] in "av"][0]
-            if POS_Candi == "a":                
-                clusters = an_clusters_dic[query_in[0]]
-            else:
-                clusters = vo_clusters_dic[query_in[0]]
-                
-            Result_Clusters = []
-            
-            for cluster in clusters:
-                Detailed_Cluster = []
-                cluster_cnt = 0.0
-                words = []
-                for sub_cluster in cluster:
-                    words.extend(sub_cluster)
-                ##取得個別字出現的次數
-                for word in words:
-                    if len(collocates_dic[word]) > 0:
-                        for collocate in collocates_dic[word]:
-                            cluster_cnt += collocate[1]
-                            Detailed_Cluster.append((collocate[0],collocate[1]))
-
-                ## 如果 Cluster 裡面超過 1 個字才呈現這個 cluster
-                if len(Detailed_Cluster) > 1:
-                    ## 開始排序, 取出 label
-                    Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
-                    # print Detailed_Cluster
-                    if len(Detailed_Cluster) > 0: ## 有查到字才留
-                        ## 進行格式化
-                        now_datas = {}
-                        now_datas['count'] = cluster_cnt
-                        now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
-                        now_datas['tag'] = Detailed_Cluster[0][0].upper()
-                        temp_data = [(query_in[0]+" <strong>"+data[0]+"</strong>",ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
-                        now_datas['data'] = temp_data
-                        
-                        Result_Clusters.append(now_datas)
-
-            Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
-
-            for cluster in Result_Clusters:
-                cluster['count'] = ConvertFreq(cluster['count'])
-
-            Return_Result = ("new",Result_Clusters)            
-
-        elif len(query_in) == 2 and query_in[0] in ["$V"] and query_in[1].isalpha(): ##Verb (or Adjective) for object
-            POS_Map_Dic = {"$V":{"POS":'v',"dic":ov_clusters_dic},"$A":{"POS":'a',"dic":an_clusters_dic}}
-            collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
-            ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源           
-            collocates_dic = defaultdict(list)
-            total_no = 0.0
-            for data in collocates:
-                
                 collocates_dic[lemmatizer.lemmatize(data[0][0],POS_Map_Dic[query_in[0]]["POS"])].append((data[0][0],data[1]))
                 total_no += data[1]
 
             ##取得 cluster 狀況
-            clusters = POS_Map_Dic[query_in[0]]["dic"][query_in[1]]
+
+            ##跟據第二個字最有可能的詞性進行搜尋
+
+            POS_Candi = [data[1] for data in BNC_POS_Dic[query_in[1].lower()] if data[1] in "nv"][0]
+
+            if POS_Candi == "n":
+                clusters = ov_clusters_dic[query_in[1]]
+            else:
+                clusters = vs_clusters_dic[query_in[1]]
+
+            #clusters = POS_Map_Dic[query_in[0]]["dic"][query_in[1]]
             Result_Clusters = []
-            
+
             for cluster in clusters:
                 Detailed_Cluster = []
                 cluster_cnt = 0.0
@@ -330,7 +393,7 @@ def query(query):
                         now_datas['tag'] = Detailed_Cluster[0][0].upper()
                         temp_data = [("<strong>"+data[0]+"</strong> "+query_in[1],ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
                         now_datas['data'] = temp_data
-                        
+
                         Result_Clusters.append(now_datas)
 
             Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
@@ -338,7 +401,7 @@ def query(query):
             for cluster in Result_Clusters:
                 cluster['count'] = ConvertFreq(cluster['count'])
 
-            Return_Result = ("new",Result_Clusters)                        
+            Return_Result = ("new",Result_Clusters)
 
         else:##傳統查詢
             query_in = query_words
@@ -356,7 +419,7 @@ def query(query):
 
             else:
                 new_queries = query_extend(query_in)
-                for query in new_queries:                    
+                for query in new_queries:
                     Search_Result_temp = getSearchResults_Inside(query)
                     ##將數次查詢的結果整合到一個資料庫中以便排序
                     Search_Result.extend(Search_Result_temp)
@@ -407,8 +470,8 @@ def query(query):
     ##            print "save error"
 
         resp = Response(json.dumps(Return_Result), status=200, mimetype='application/json')
-        return resp        
-        
+        return resp
+
     else:
         Return_Result = ("old",[])
         resp = Response(json.dumps(Return_Result), status=200, mimetype='application/json')
@@ -436,4 +499,4 @@ if __name__ == '__main__':
         print "yes"
 
     app.run(**app_options)
- 
+
