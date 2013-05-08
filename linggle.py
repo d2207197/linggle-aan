@@ -232,11 +232,67 @@ def query(query):
 ##        pass
 
     Search_Result = []
+    Final_Result = []
 
     if len(query_in) > 0:
+        ##傳統查詢
+        query_in = query_words
+        ##先檢查是否屬於all star狀況
+        if checkIfallStar(query_in):  # 是的話特別處理
+            # print "All Star!!!"
+            ##檢查是否有任何一個token是屬於alternative 拆解之(若有多個 拆比較少的那一個)
+            new_queries = similar_query_split(query_in)
+            # print new_queries
+            if len(new_queries) > 0:  # 成功轉換
+                for query in new_queries:
+                    Search_Result_temp = getSearchResults_Inside(query)
+                    ##將數次查詢的結果整合到一個資料庫中以便排序
+                    Search_Result.extend(Search_Result_temp)
+
+        else:
+            new_queries = query_extend(query_in)
+            for query in new_queries:
+                Search_Result_temp = getSearchResults_Inside(query)
+                ##將數次查詢的結果整合到一個資料庫中以便排序
+                Search_Result.extend(Search_Result_temp)
+
+        ##避免搜尋到重複的結果
+        Search_Result = list(set(Search_Result))
+        total_no = sum([data[1] for data in Search_Result])
+        ##排序 以便取Top N
+        #Search_Result.sort(key=lambda x: x[1], reverse=True)
+        Search_Result.sort(cmp = compare)
+
+        ##取前Top N就好
+        Search_Result = [[data[0], data[1], data[1] * 100 / total_no]
+                         for data in Search_Result[:TRADITIONAL_RESULT_LIMIT]]
+
+        ## 進行統計跟格式的refinement
+        Return_Result = []
+        for i in range(len(Search_Result)):
+
+            phrase, freq, percentage = Search_Result[i]
+
+            if int(freq) >= 100:
+                freq_str = "{:,d}".format(int(freq) / 100 * 100)
+            else:
+                freq_str = str(int(freq)).strip()
+
+            if percentage < 1:
+                percentage = " < 1%"
+            else:
+                percentage = " %2.0f %%" % percentage
+
+            # updated
+            Return_Result.append({"phrase": phrase, "count": freq,
+                                 "percent": percentage, "count_str": freq_str})
+
+        Final_Result.append(("old",Return_Result))
+        query_in = query_in.split()
 
         ##配合新版搭配詞功能，檢查是否符合特定搭配詞狀況
         if len(query_in) == 2 and query_in[0].isalpha() and query_in[1] in ["$N","$V"]: ##VERB $N or ADJ $N or Subj $V
+
             if query_in[1] == "$N": ##VERB $N or ADJ $N
                 collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
                 ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源
@@ -312,7 +368,7 @@ def query(query):
                 for cluster in Result_Clusters:
                     cluster['count'] = ConvertFreq(cluster['count'])
 
-                Return_Result = ("new",Result_Clusters)
+                Final_Result.append(("new",Result_Clusters))
 
             elif query_in[1] == "$V": ##SUBJ $V
                 print "SUBJ_$V"
@@ -381,7 +437,7 @@ def query(query):
                 for cluster in Result_Clusters:
                     cluster['count'] = ConvertFreq(cluster['count'])
 
-                Return_Result = ("new",Result_Clusters)
+                Final_Result.append(("new",Result_Clusters))
 
         elif len(query_in) == 2 and query_in[0] in ["$V","$N","$A"] and query_in[1].isalpha(): ##Verb (or Adjective) for object: $V NOUN, $A NOUN; sv: $N Verb
             POS_Map_Dic = {"$N":{"POS":"n"},"$V":{"POS":'v'},"$A":{"POS":'a'}}
@@ -470,61 +526,8 @@ def query(query):
             for cluster in Result_Clusters:
                 cluster['count'] = ConvertFreq(cluster['count'])
 
-            Return_Result = ("new",Result_Clusters)
+            Final_Result.append(("new",Result_Clusters))
 
-        else:##傳統查詢
-            query_in = query_words
-            ##先檢查是否屬於all star狀況
-            if checkIfallStar(query_in):  # 是的話特別處理
-                # print "All Star!!!"
-                ##檢查是否有任何一個token是屬於alternative 拆解之(若有多個 拆比較少的那一個)
-                new_queries = similar_query_split(query_in)
-                # print new_queries
-                if len(new_queries) > 0:  # 成功轉換
-                    for query in new_queries:
-                        Search_Result_temp = getSearchResults_Inside(query)
-                        ##將數次查詢的結果整合到一個資料庫中以便排序
-                        Search_Result.extend(Search_Result_temp)
-
-            else:
-                new_queries = query_extend(query_in)
-                for query in new_queries:
-                    Search_Result_temp = getSearchResults_Inside(query)
-                    ##將數次查詢的結果整合到一個資料庫中以便排序
-                    Search_Result.extend(Search_Result_temp)
-
-            ##避免搜尋到重複的結果
-            Search_Result = list(set(Search_Result))
-            total_no = sum([data[1] for data in Search_Result])
-            ##排序 以便取Top N
-            #Search_Result.sort(key=lambda x: x[1], reverse=True)
-            Search_Result.sort(cmp = compare)
-
-            ##取前Top N就好
-            Search_Result = [[data[0], data[1], data[1] * 100 / total_no]
-                             for data in Search_Result[:TRADITIONAL_RESULT_LIMIT]]
-
-            ## 進行統計跟格式的refinement
-            Return_Result = []
-            for i in range(len(Search_Result)):
-
-                phrase, freq, percentage = Search_Result[i]
-
-                if int(freq) >= 100:
-                    freq_str = "{:,d}".format(int(freq) / 100 * 100)
-                else:
-                    freq_str = str(int(freq)).strip()
-
-                if percentage < 1:
-                    percentage = " < 1%"
-                else:
-                    percentage = " %2.0f %%" % percentage
-
-                # updated
-                Return_Result.append({"phrase": phrase, "count": freq,
-                                     "percent": percentage, "count_str": freq_str})
-
-            Return_Result = ("old",Return_Result)
 
     ##        ##存下來 做為cache
     ##        try:
@@ -538,12 +541,12 @@ def query(query):
     ##        except:
     ##            print "save error"
 
-        resp = Response(json.dumps(Return_Result), status=200, mimetype='application/json')
+        resp = Response(json.dumps(Final_Result), status=200, mimetype='application/json')
         return resp
 
     else:
-        Return_Result = ("old",[])
-        resp = Response(json.dumps(Return_Result), status=200, mimetype='application/json')
+        Final_Result = [("old",[])]
+        resp = Response(json.dumps(Final_Result), status=200, mimetype='application/json')
         return resp
 
 
