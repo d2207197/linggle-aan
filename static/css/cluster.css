@@ -7,6 +7,10 @@
 .cluster-odd  {background: #eedd83;}
 .cluster-even {background: #99f08a;}
 
+/*.layer2-interleve {}*/
+.layer2-odd {background: #feffc8;}
+.layer2-even {background: #d8ffbf;}
+
 .cluster-odd-apple  	{background: #fdfeb0!important;}
 .cluster-even-apple {background: #c8fea9!important;}
 

@@ -1,5 +1,6 @@
-var THRESHOLD = 5;
+var THRESHOLD = 11;
 var AutoOnTopK = 3;
+var LAYER2_PREVIEW = 3;
 
 function _show_clustering_results(data)
 {
@@ -8,7 +9,7 @@ function _show_clustering_results(data)
 	var k = 0;
 	$.each(data, function(cidx, c){
 		// get cluster label, e.g., relationship
-		var members = c.data;
+		var layer1 = c.data;
 		var cid = 'c' + (k).toString();
 		if(k % 2 == 0)cluster_theme = 'cluster-even';
 		else cluster_theme = 'cluster-odd';
@@ -24,7 +25,7 @@ function _show_clustering_results(data)
 		var tag_text = $('<div/>').addClass('tag-text').appendTo(tag_container);
 		
 		$('<span/>').text(c.tag).appendTo(tag_text);
-		$('<span/>').addClass('tag-text-count').text('('+members.length.toString()+')').appendTo(tag_text);
+		$('<span/>').addClass('tag-text-count').text('('+layer1.length.toString()+')').appendTo(tag_text);
 
 		var cluster = $('<div/>').addClass('cluster hide').attr('id',cid).addClass(cluster_theme).appendTo(cluster_container);
 		var cluster_label_container = $('<div/>').addClass('cluster-label-container').appendTo(cluster);
@@ -33,29 +34,62 @@ function _show_clustering_results(data)
 		
 		var entry_wrap = $('<div/>').addClass('entry-wrap').appendTo(cluster);
 
+		// var layer2_member_cnt = 0;
+		var show_layer2_cnt = 0;
+		// Extract layer-1 clusters
+		$.each(layer1, function(k, c2){
 
-		$.each(members, function(i){
-			// get all members
-			ngram = members[i][0];
-			count = members[i][1];
-			percent = members[i][2];
-			
-			if(i >= THRESHOLD) {
-				fold = 'fold-target hide';
-			}else{
-				fold = '';
-			}
+			var layer2 = c2.data;
 
-			var entry = $('<div/>').addClass('entry '+fold).appendTo(entry_wrap);
+			console.log('current >',k);
+			var bglayer2 = k % 2 == 0 ? "" : "layer2-interleve"
 
-			var entry_ngram = $('<div/>').addClass('entry-ngram').html(ngram).appendTo(entry);
-			var entry_count = $('<div/>').addClass('entry-count').text(count).appendTo(entry);
-			var entry_percent = $('<div/>').addClass('entry-percent').text(percent).appendTo(entry);
-			var entry_example = $('<div/>').addClass('entry-example').appendTo(entry);
 
-			var example_btn_expand = $('<img/>').addClass('entry-example-btn-expand').attr('src','static/img/example-btn.png').appendTo(entry_example);
-			var example_btn_shrink = $('<img/>').addClass('entry-example-btn-shrink hide').attr('src','static/img/example-btn-shrink.png').appendTo(entry_example);
+			// Extract layer-2 clusters
+			$.each(layer2, function(i){
+
+				// total shown cluster layer1 members
+				// layer2_member_cnt += 1
+				// console.log(' #ngram:',layer2[i][0])
+				// console.log(' #layer2_member_cnt',layer2_member_cnt, '## Hide:',i >= LAYER2_PREVIEW)
+				// if(layer2_member_cnt >= THRESHOLD) {
+				// 	// fold = '';
+				// 	fold = 'fold-target hide';
+				// }else if{
+				// 	fold = '';
+				// }
+				if(i >= LAYER2_PREVIEW)
+				{
+					// hide
+					fold = 'fold-target hide';
+				}else
+				{	
+					// show
+					show_layer2_cnt += 1
+					fold = '';
+				}
+				if (show_layer2_cnt >= THRESHOLD)
+				{
+					fold = 'fold-target hide';
+				}
+
+				// get all layer2
+				ngram = layer2[i][0];
+				count = layer2[i][1];
+				percent = layer2[i][2];
+
+				var entry = $('<div/>').addClass('entry '+fold).addClass(bglayer2).appendTo(entry_wrap);
+
+				var entry_ngram = $('<div/>').addClass('entry-ngram').html(ngram).appendTo(entry);
+				var entry_count = $('<div/>').addClass('entry-count').text(count).appendTo(entry);
+				var entry_percent = $('<div/>').addClass('entry-percent').text(percent).appendTo(entry);
+				var entry_example = $('<div/>').addClass('entry-example').appendTo(entry);
+
+				var example_btn_expand = $('<img/>').addClass('entry-example-btn-expand').attr('src','static/img/example-btn.png').appendTo(entry_example);
+				var example_btn_shrink = $('<img/>').addClass('entry-example-btn-shrink hide').attr('src','static/img/example-btn-shrink.png').appendTo(entry_example);
+			});
 		});
+		// console.log(k);
 
 		// add the (more) item
 		if(entry_wrap.find('.entry').length >= THRESHOLD)
@@ -89,13 +123,16 @@ function attach_cluster_tag_event()
 		$.each(tag_on, function(i){
 			var idx = tag_on.eq(i).attr('idx');
 
-			if(i % 2 == 0)cluster_theme = 'cluster-even';
-			else cluster_theme = 'cluster-odd';
+			if(i % 2 == 0){cluster_theme = 'cluster-even'; interleve = 'layer2-even';}
+			else {cluster_theme = 'cluster-odd'; interleve = 'layer2-odd';}
+
+
 
 			var isMacLike = navigator.userAgent.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
 
 			if(isMacLike)cluster_theme = cluster_theme + '-apple';
 			$('#'+idx).removeClass('hide cluster-even cluster-odd cluster-even-apple cluster-odd-apple').addClass(cluster_theme);
+			$('#'+idx).find('.layer2-interleve').removeClass('layer2-odd layer2-even').addClass(interleve);
 		})
 	});
 }
