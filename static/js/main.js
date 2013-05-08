@@ -358,9 +358,9 @@ var content_mode = 'cluster';
 function fetch_worker(server, query)
 {
 	var request = $.ajax({
-		// url: server + query,
+		url: server + query,
 		// url: 'static/A_beach.json',
-		url: "static/cultivate_N_new.json",
+		// url: "static/cultivate_N_new.json",
 		type: "GET",
 		dataType: "json",
 		timeout: QUERY_SERVICE_TIMEOUT
@@ -431,24 +431,29 @@ function fill_content(content_mode)
 {
 	_clear_previous_results();
 
+	$('#cluster-toggle').removeClass('normal-mode cluster-mode');
+
 	if(content_mode == 'cluster' && cluster_idx)
 	{
 		var data = RECV_DATA[cluster_idx][1];
 		_show_clustering_results(data);
 		$('#normal-result-container').addClass('hide');
-		$('#cluster-result-container').removeClass('hide');			
+		$('#cluster-result-container').removeClass('hide');	
+		$('#cluster-toggle').addClass('cluster-mode');
 	}
 	else if(content_mode == 'normal' || (content_mode == 'cluster' && !cluster_idx) )
 	{
 		var data = RECV_DATA[normal_idx][1];
 		_show_traditional_results(data);
 		$('#cluster-result-container').addClass('hide');
-		$('#normal-result-container').removeClass('hide');			
+		$('#normal-result-container').removeClass('hide');
+		$('#cluster-toggle').addClass('normal-mode');			
 	}	
 }
 function attach_cluster_toggle_event()
 {
 	$('#cluster-toggle').click(function(){
+
 		if(content_mode == 'cluster')
 		{
 			content_mode = 'normal';
@@ -459,8 +464,13 @@ function attach_cluster_toggle_event()
 			if(cluster_idx)
 			{
 				content_mode = 'cluster';
+				// $(this).addClass('cluster-mode');
+			}else{
+				// $(this).addClass('normal-mode');
 			}
 		}
+		
+
 		fill_content(content_mode);
 	});
 }
