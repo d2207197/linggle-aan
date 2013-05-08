@@ -49,6 +49,8 @@ vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick'
 ov_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_ov_large.pick','r').read())
 ## clusters of NOUN for given Adjective
 an_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_an_nouns.pick','r').read())
+## clusters of Adjective for given Noun
+na_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_an_adj.pick','r').read())
 ## clusters of Subject for given Verb
 vs_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vs_large.pick','r').read())
 ## clusters of Verbs for given Subject
@@ -234,7 +236,7 @@ def query(query):
     if len(query_in) > 0:
 
         ##配合新版搭配詞功能，檢查是否符合特定搭配詞狀況
-        if len(query_in) == 2 and query_in[0].isalpha() and query_in[1] in ["$N","$V"]: ##VERB $N or ADJ $N or Sub $V
+        if len(query_in) == 2 and query_in[0].isalpha() and query_in[1] in ["$N","$V"]: ##VERB $N or ADJ $N or Subj $V
             if query_in[1] == "$N": ##VERB $N or ADJ $N
                 collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
                 ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源
@@ -342,7 +344,7 @@ def query(query):
 
                 Return_Result = ("new",Result_Clusters)
 
-        elif len(query_in) == 2 and query_in[0] in ["$V","$N"] and query_in[1].isalpha(): ##Verb (or Adjective) for object: $V NOUN
+        elif len(query_in) == 2 and query_in[0] in ["$V","$N","$A"] and query_in[1].isalpha(): ##Verb (or Adjective) for object: $V NOUN, $A NOUN; sv: $N Verb
             POS_Map_Dic = {"$N":{"POS":"n"},"$V":{"POS":'v'},"$A":{"POS":'a'}}
             ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源
             collocates = [(data[0].replace("<strong>","").replace("</strong>","").split(),data[1]) for data in getSearchResults_Inside(" ".join(query_in))[:CLUSTER_RESULT_LIMIT]]
@@ -357,11 +359,14 @@ def query(query):
 
             ##跟據第二個字最有可能的詞性進行搜尋
 
-            POS_Candi = [data[1] for data in BNC_POS_Dic[query_in[1].lower()] if data[1] in "nv"][0]
+            POS_Candi = [data[1] for data in BNC_POS_Dic[query_in[1].lower()] if data[1] in "nva"][0]
 
             if POS_Candi == "n":
-                clusters = ov_clusters_dic[query_in[1]]
-            else:
+                if query_in[0] == "$V":
+                    clusters = ov_clusters_dic[query_in[1]]
+                else:
+                    clusters = na_clusters_dic[query_in[1]]
+            elif POS_Candi == "v":
                 clusters = vs_clusters_dic[query_in[1]]
 
             #clusters = POS_Map_Dic[query_in[0]]["dic"][query_in[1]]
