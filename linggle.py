@@ -256,36 +256,56 @@ def query(query):
                 else:
                     clusters = vo_clusters_dic[query_in[0]]
 
+                ##開始分析 cluster的內容
                 Result_Clusters = []
 
                 for cluster in clusters:
-                    Detailed_Cluster = []
+                    Sub_Clusters = [] ##記錄所有 sub-cluster 的內容
                     cluster_cnt = 0.0
-                    words = []
-                    for sub_cluster in cluster:
-                        words.extend(sub_cluster)
-                    ##取得個別字出現的次數
-                    for word in words:
-                        if len(collocates_dic[word]) > 0:
-                            for collocate in collocates_dic[word]:
-                                cluster_cnt += collocate[1]
-                                Detailed_Cluster.append((collocate[0],collocate[1]))
+                    cluster_wno = 0 ##記錄此 cluster 的總字數
+                    max_cnt = 0.0
+                    label_candi = "" ##記錄此cluster的代表字
 
-                    ## 如果 Cluster 裡面超過 1 個字才呈現這個 cluster
-                    if len(Detailed_Cluster) > 1:
-                        ## 開始排序, 取出 label
-                        Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
-                        # print Detailed_Cluster
-                        if len(Detailed_Cluster) > 0: ## 有查到字才留
+                    for sub_cluster in cluster:
+                        Sub_Cluster_Details = [] ##記錄目前處理的 sub-cluster (level 2)的內容
+                        sub_cluster_cnt = 0.0
+                        ##取得該cluster(level 2)個別字出現的次數 以便之後sub cluster排序
+                        for word in sub_cluster:
+                            if len(collocates_dic[word]) > 0:
+                                for collocate in collocates_dic[word]:
+                                    sub_cluster_cnt += collocate[1]
+                                    cluster_cnt += collocate[1]
+                                    cluster_wno += 1
+                                    Sub_Cluster_Details.append((collocate[0],collocate[1]))
+                                    ##記錄Label
+                                    if collocate[1] > max_cnt:
+                                        max_cnt = collocate[1]
+                                        label_candi = collocate[0]
+
+                        ## 如果 Sub-Cluster 裡面至少 1 個字才呈現這個 sub-cluster
+                        if len(Sub_Cluster_Details) > 0:
+                            ## 開始排序
+                            Sub_Cluster_Details.sort(key = lambda x:x[1], reverse = True)
+
                             ## 進行格式化
                             now_datas = {}
-                            now_datas['count'] = cluster_cnt
-                            now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
-                            now_datas['tag'] = Detailed_Cluster[0][0].upper()
-                            temp_data = [(query_in[0]+" <strong>"+data[0]+"</strong>",ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
+                            now_datas['count'] = sub_cluster_cnt
+                            now_datas['percent'] = ConvertPercentage(sub_cluster_cnt*100/total_no)
+                            temp_data = [(query_in[0]+" <strong>"+data[0]+"</strong>",ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Sub_Cluster_Details]
                             now_datas['data'] = temp_data
 
-                            Result_Clusters.append(now_datas)
+                            Sub_Clusters.append(now_datas)
+
+                    if cluster_wno > 1: ##至少有兩個字以上在這個cluster
+                        ## Sub-Cluster 依照總次數排序
+                        Sub_Clusters.sort(key = lambda x:x['count'], reverse = True)
+
+                        now_datas = {}
+                        now_datas['count'] = cluster_cnt
+                        now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
+                        now_datas['tag'] = label_candi.upper()
+                        now_datas['data'] = Sub_Clusters
+                        Result_Clusters.append(now_datas)
 
                 Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
 
@@ -309,33 +329,52 @@ def query(query):
                 Result_Clusters = []
 
                 for cluster in clusters:
-                    Detailed_Cluster = []
+                    Sub_Clusters = [] ##記錄所有 sub-cluster 的內容
                     cluster_cnt = 0.0
-                    words = []
-                    for sub_cluster in cluster:
-                        words.extend(sub_cluster)
-                    ##取得個別字出現的次數
-                    for word in words:
-                        if len(collocates_dic[word]) > 0:
-                            for collocate in collocates_dic[word]:
-                                cluster_cnt += collocate[1]
-                                Detailed_Cluster.append((collocate[0],collocate[1]))
+                    cluster_wno = 0 ##記錄此 cluster 的總字數
+                    max_cnt = 0.0
+                    label_candi = "" ##記錄此cluster的代表字
 
-                    ## 如果 Cluster 裡面超過 1 個字才呈現這個 cluster
-                    if len(Detailed_Cluster) > 1:
-                        ## 開始排序, 取出 label
-                        Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
-                        # print Detailed_Cluster
-                        if len(Detailed_Cluster) > 0: ## 有查到字才留
+                    for sub_cluster in cluster:
+                        Sub_Cluster_Details = [] ##記錄目前處理的 sub-cluster (level 2)的內容
+                        sub_cluster_cnt = 0.0
+                        ##取得該cluster(level 2)個別字出現的次數 以便之後sub cluster排序
+                        for word in sub_cluster:
+                            if len(collocates_dic[word]) > 0:
+                                for collocate in collocates_dic[word]:
+                                    sub_cluster_cnt += collocate[1]
+                                    cluster_cnt += collocate[1]
+                                    cluster_wno += 1
+                                    Sub_Cluster_Details.append((collocate[0],collocate[1]))
+                                    ##記錄Label
+                                    if collocate[1] > max_cnt:
+                                        max_cnt = collocate[1]
+                                        label_candi = collocate[0]
+
+                        ## 如果 Sub-Cluster 裡面至少 1 個字才呈現這個 sub-cluster
+                        if len(Sub_Cluster_Details) > 0:
+                            ## 開始排序
+                            Sub_Cluster_Details.sort(key = lambda x:x[1], reverse = True)
+
                             ## 進行格式化
                             now_datas = {}
-                            now_datas['count'] = cluster_cnt
-                            now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
-                            now_datas['tag'] = Detailed_Cluster[0][0].upper()
-                            temp_data = [(query_in[0]+" <strong>"+data[0]+"</strong>",ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
+                            now_datas['count'] = sub_cluster_cnt
+                            now_datas['percent'] = ConvertPercentage(sub_cluster_cnt*100/total_no)
+                            temp_data = [(query_in[0]+" <strong>"+data[0]+"</strong>",ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Sub_Cluster_Details]
                             now_datas['data'] = temp_data
 
-                            Result_Clusters.append(now_datas)
+                            Sub_Clusters.append(now_datas)
+
+                    if cluster_wno > 1: ##至少有兩個字以上在這個cluster
+                        ## Sub-Cluster 依照總次數排序
+                        Sub_Clusters.sort(key = lambda x:x['count'], reverse = True)
+
+                        now_datas = {}
+                        now_datas['count'] = cluster_cnt
+                        now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
+                        now_datas['tag'] = label_candi.upper()
+                        now_datas['data'] = Sub_Clusters
+                        Result_Clusters.append(now_datas)
 
                 Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
 
@@ -357,9 +396,9 @@ def query(query):
                 # collocates_dic[lemmatizer.lemmatize(data[0][0],POS_Map_Dic[query_in[0]]["POS"])].append((data[0][0],data[1]))
 
                 # edited by Maxis
-                # solve the issue: "leading car" occurs in the results of "$V car"                
+                # solve the issue: "leading car" occurs in the results of "$V car"
                 collocates_dic[data[0][0]].append((data[0][0],data[1]))
-                
+
                 total_no += data[1]
 
             ##取得 cluster 狀況
@@ -376,37 +415,55 @@ def query(query):
             elif POS_Candi == "v":
                 clusters = vs_clusters_dic[query_in[1]]
 
-            #clusters = POS_Map_Dic[query_in[0]]["dic"][query_in[1]]
             Result_Clusters = []
 
             for cluster in clusters:
-                Detailed_Cluster = []
+                Sub_Clusters = [] ##記錄所有 sub-cluster 的內容
                 cluster_cnt = 0.0
-                words = []
-                for sub_cluster in cluster:
-                    words.extend(sub_cluster)
-                ##取得個別字出現的次數
-                for word in words:
-                    if len(collocates_dic[word]) > 0:
-                        for collocate in collocates_dic[word]:
-                            cluster_cnt += collocate[1]
-                            Detailed_Cluster.append((collocate[0],collocate[1]))
+                cluster_wno = 0 ##記錄此 cluster 的總字數
+                max_cnt = 0.0
+                label_candi = "" ##記錄此cluster的代表字
 
-                ## 如果 Cluster 裡面超過 1 個字才呈現這個 cluster
-                if len(Detailed_Cluster) > 1:
-                    ## 開始排序, 取出 label
-                    Detailed_Cluster.sort(key = lambda x:x[1], reverse = True)
-                    # print Detailed_Cluster
-                    if len(Detailed_Cluster) > 0: ## 有查到字才留
+                for sub_cluster in cluster:
+                    Sub_Cluster_Details = [] ##記錄目前處理的 sub-cluster (level 2)的內容
+                    sub_cluster_cnt = 0.0
+                    ##取得該cluster(level 2)個別字出現的次數 以便之後sub cluster排序
+                    for word in sub_cluster:
+                        if len(collocates_dic[word]) > 0:
+                            for collocate in collocates_dic[word]:
+                                sub_cluster_cnt += collocate[1]
+                                cluster_cnt += collocate[1]
+                                cluster_wno += 1
+                                Sub_Cluster_Details.append((collocate[0],collocate[1]))
+                                ##記錄Label
+                                if collocate[1] > max_cnt:
+                                    max_cnt = collocate[1]
+                                    label_candi = collocate[0]
+
+                    ## 如果 Sub-Cluster 裡面至少 1 個字才呈現這個 sub-cluster
+                    if len(Sub_Cluster_Details) > 0:
+                        ## 開始排序
+                        Sub_Cluster_Details.sort(key = lambda x:x[1], reverse = True)
+
                         ## 進行格式化
                         now_datas = {}
-                        now_datas['count'] = cluster_cnt
-                        now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
-                        now_datas['tag'] = Detailed_Cluster[0][0].upper()
-                        temp_data = [("<strong>"+data[0]+"</strong> "+query_in[1],ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Detailed_Cluster]
+                        now_datas['count'] = sub_cluster_cnt
+                        now_datas['percent'] = ConvertPercentage(sub_cluster_cnt*100/total_no)
+                        temp_data = [(query_in[0]+" <strong>"+data[0]+"</strong>",ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Sub_Cluster_Details]
                         now_datas['data'] = temp_data
 
-                        Result_Clusters.append(now_datas)
+                        Sub_Clusters.append(now_datas)
+
+                if cluster_wno > 1: ##至少有兩個字以上在這個cluster
+                    ## Sub-Cluster 依照總次數排序
+                    Sub_Clusters.sort(key = lambda x:x['count'], reverse = True)
+
+                    now_datas = {}
+                    now_datas['count'] = cluster_cnt
+                    now_datas['percent'] = ConvertPercentage(cluster_cnt*100/total_no)
+                    now_datas['tag'] = label_candi.upper()
+                    now_datas['data'] = Sub_Clusters
+                    Result_Clusters.append(now_datas)
 
             Result_Clusters.sort(key = lambda x:x['count'], reverse = True)
 
