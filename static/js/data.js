@@ -1,7 +1,7 @@
 // DATA
 var EXAMPLE = {
     "CMD": [
-        "$A beach", 
+        "$A beach <span>cluster</span>", 
         "cultivate $N <span>cluster</span>",
         "$V an important $N", 
 
