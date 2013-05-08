@@ -1,19 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sqlite3, os
+
+import sqlite3, os, pickle, logging
 from flask import Flask, g, render_template, Response, json
-from contextlib import closing
-from time import ctime
-import pickle
-import logging
-# from examples import get_Examples
-# from getSampleSent import getSamples
-import getSampleSent
 from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
-import HLIParser
-from query import checkIfallStar, similar_query_split, getSearchResults_Inside, query_extend
 from urllib import unquote
+from contextlib import closing
+
+# our own
+import getSampleSent, HLIParser
+from query import checkIfallStar, similar_query_split, getSearchResults_Inside, query_extend
 
 DATABASE = 'linggle.db3'
 DEBUG = True
@@ -41,22 +38,34 @@ for path in CLUSTER_ROOT:
         CLUSTER_ROOT_PATH = ''
 
 ## POS dictionary
+logger.debug('Load bncwordlemma.pick')
 BNC_POS_Dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'bncwordlemma.pick','r').read())
 
 ## clusters of objects for given VERB
+logger.debug('Load cluster_vo_large.pick')
 vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick','r').read())
+
 ## clusters of VERBs for given NOUN
+logger.debug('Load cluster_ov_large.pick')
 ov_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_ov_large.pick','r').read())
+
 ## clusters of NOUN for given Adjective
+logger.debug('Load cluster_an_nouns.pick')
 an_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_an_nouns.pick','r').read())
+
 ## clusters of Adjective for given Noun
+logger.debug('Load cluster_an_adj.pick')
 na_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_an_adj.pick','r').read())
+
 ## clusters of Subject for given Verb
+logger.debug('Load cluster_vs_large.pick')
 vs_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vs_large.pick','r').read())
+
 ## clusters of Verbs for given Subject
+logger.debug('Load cluster_sv_large.pick')
 sv_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_sv_large.pick','r').read())
 
-
+logger.debug('Init WordNetLemmatizer')
 lemmatizer = WordNetLemmatizer()
 
 def connect_db():
@@ -438,7 +447,7 @@ def query(query):
                     cluster['count'] = ConvertFreq(cluster['count'])
 
                 Final_Result.append(("new",Result_Clusters))
-
+        # condition: $A_beach, $V_cultivate
         elif len(query_in) == 2 and query_in[0] in ["$V","$N","$A"] and query_in[1].isalpha(): ##Verb (or Adjective) for object: $V NOUN, $A NOUN; sv: $N Verb
             POS_Map_Dic = {"$N":{"POS":"n"},"$V":{"POS":'v'},"$A":{"POS":'a'}}
             ##去除不必要的 strong 標記，並且記錄原型化  做為 cluster　次數的查詢來源
@@ -505,7 +514,8 @@ def query(query):
                         now_datas = {}
                         now_datas['count'] = sub_cluster_cnt
                         now_datas['percent'] = ConvertPercentage(sub_cluster_cnt*100/total_no)
-                        temp_data = [(query_in[0]+" <strong>"+data[0]+"</strong>",ConvertFreq(data[1]),ConvertPercentage(data[1]*100/total_no)) for data in Sub_Cluster_Details]
+
+                        temp_data = [("<strong>"+data[0]+"</strong> " + query_in[1], ConvertFreq(data[1]), ConvertPercentage(data[1]*100/total_no)) for data in Sub_Cluster_Details]
                         now_datas['data'] = temp_data
 
                         Sub_Clusters.append(now_datas)
@@ -527,7 +537,7 @@ def query(query):
                 cluster['count'] = ConvertFreq(cluster['count'])
 
             Final_Result.append(("new",Result_Clusters))
-
+            # end if condition $A_beach, $V_cultivate
 
     ##        ##存下來 做為cache
     ##        try:
@@ -568,7 +578,6 @@ if __name__ == '__main__':
         app_options["use_debugger"] = False
         app_options["use_reloader"] = False
         app_options["host"] = "0.0.0.0"
-        print "yes"
 
     app.run(**app_options)
 
