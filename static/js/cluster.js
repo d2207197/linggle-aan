@@ -1,15 +1,18 @@
 var THRESHOLD = 11;
 var AutoOnTopK = 3;
 var LAYER2_PREVIEW = 3;
-
+var TIP_SHOW_TIME = 8000;
+var FIRST_TIME_SHOW_TIP = true;
 function _show_clustering_results(data)
 {
 	var cluster_container = $('#clusters-container');
 	// cluster_container.html('');
 	var k = 0;
+	if (FIRST_TIME_SHOW_TIP){
+		$('#tip').slideDown(500);
+
+	}
 	$.each(data, function(cidx, c){
-
-
 
 		// get cluster label, e.g., relationship
 		var layer1 = c.data;
@@ -51,16 +54,6 @@ function _show_clustering_results(data)
 			// Extract layer-2 clusters
 			$.each(layer2, function(i){
 
-				// total shown cluster layer1 members
-				// layer2_member_cnt += 1
-				// console.log(' #ngram:',layer2[i][0])
-				// console.log(' #layer2_member_cnt',layer2_member_cnt, '## Hide:',i >= LAYER2_PREVIEW)
-				// if(layer2_member_cnt >= THRESHOLD) {
-				// 	// fold = '';
-				// 	fold = 'fold-target hide';
-				// }else if{
-				// 	fold = '';
-				// }
 				if(i >= LAYER2_PREVIEW)
 				{
 					// hide
@@ -110,7 +103,12 @@ function _show_clustering_results(data)
 			obj.click();	
 		}
 	});
-	// check_style();
+
+	// After a few secs, close tip (TIP_SHOW_TIME)
+	if(FIRST_TIME_SHOW_TIP){
+		setTimeout(function(){ $('#tip').slideUp(500); },TIP_SHOW_TIME);
+		FIRST_TIME_SHOW_TIP = false;
+	}
 }
 
 function attach_cluster_tag_event()

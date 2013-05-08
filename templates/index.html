@@ -81,51 +81,24 @@
 
 					<!-- <div id="search-example">Example</div> -->
 					<div id="search-help">Help</div>
-					<button id="cluster-toggle" class="normal-mode">cluster</button>
+					<button id="cluster-toggle" class="normal-mode hide">cluster</button>
 
 
 					<div id="search-loading"><img src="static/img/loading.gif"></div>
 				</div>
+
 			</div>
 		</div>
 		<div id="content">
 			<div id="cmd-convert-result"></div>
 
 			<div id="cluster-result-container" class="result-container hide">
+				<div id="tip" class="f hide">@ Tip : In each bubble, <em>very</em> similar words are grouped togheter under the same tint!</div>
 				<div id="cluster-type-container"><!-- preserve for cluster type (VN, AN) --></div>
 				<div id="cluster-tag-container"></div>
 				<div id="clusters-container" class="f"></div>
 			</div>
-
-
-			<table id="normal-result-container" cellspacing="0" cellpadding="0">
-<!-- 				<tr class="item">
-					<td class="item-ngram">
-						<div class="item-ngram-text"><strong>sandy</strong> beach</div>
-						<div class="item-bar"></div>
-					</td>
-					<td class="item-portion">10%</td>
-					<td class="item-count">413,330</td>
-					<td class="item-example">
-						<img src="static/img/example-btn.png"></img>
-						<img class="hide" src="static/img/example-btn-shrink.png"></img>
-					</td>
-				</tr>
-				<tr class="item">
-					<td class="item-ngram">
-						<div class="item-ngram-text"><strong>sandy</strong> beach</div>
-						<div class="item-bar"></div>
-					</td>
-					<td class="item-portion">10%</td>
-					<td class="item-count">413,330</td>
-					<td class="item-example">
-						<img src="static/img/example-btn.png"></img>
-						<img class="hide" src="static/img/example-btn-shrink.png"></img>
-					</td>
-				</tr> -->				
-			</table>
-
-
+			<table id="normal-result-container" cellspacing="0" cellpadding="0"></table>
 			<table id="result-block"  cellspacing="0" cellpadding="0"  class="hide"></table>
 		</div>
 		<div id="content-mask"></div>

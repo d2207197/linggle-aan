@@ -357,6 +357,7 @@ var content_mode = 'cluster';
 /// fetch data from wujc, including cluster/tratitional results
 function fetch_worker(server, query)
 {
+	$('#cluster-toggle').hide(0);
 	var request = $.ajax({
 		url: server + query,
 		// url: 'static/A_beach.json',
@@ -380,6 +381,7 @@ function fetch_worker(server, query)
 
 			cluster_idx = recv[0][0] == 'new' ? 0 : 1
 			normal_idx = 1 - cluster_idx
+			$('#cluster-toggle').show(0);
 		}else{
 			console.error('invalid recv data:',recv)
 		}
@@ -452,10 +454,14 @@ function fill_content(content_mode)
 }
 function attach_cluster_toggle_event()
 {
+
 	$('#cluster-toggle').click(function(){
 
 		if(content_mode == 'cluster')
 		{
+			// cluster -> normal
+
+			$('#tip').hide(0);
 			content_mode = 'normal';
 			
 		}else if(content_mode == 'normal')
@@ -469,8 +475,6 @@ function attach_cluster_toggle_event()
 				// $(this).addClass('normal-mode');
 			}
 		}
-		
-
 		fill_content(content_mode);
 	});
 }
