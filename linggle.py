@@ -352,7 +352,14 @@ def query(query):
             collocates_dic = defaultdict(list)
             total_no = 0.0
             for data in collocates:
-                collocates_dic[lemmatizer.lemmatize(data[0][0],POS_Map_Dic[query_in[0]]["POS"])].append((data[0][0],data[1]))
+
+                # origin version
+                # collocates_dic[lemmatizer.lemmatize(data[0][0],POS_Map_Dic[query_in[0]]["POS"])].append((data[0][0],data[1]))
+
+                # edited by Maxis
+                # solve the issue: "leading car" occurs in the results of "$V car"                
+                collocates_dic[data[0][0]].append((data[0][0],data[1]))
+                
                 total_no += data[1]
 
             ##取得 cluster 狀況
