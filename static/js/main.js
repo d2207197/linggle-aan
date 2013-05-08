@@ -350,9 +350,9 @@ function _clear_previous_results()
 function fetch_worker(server, query)
 {
 	var request = $.ajax({
-		url: server + query,
+		// url: server + query,
 		// url: 'static/A_beach.json',
-		// url: "static/cultivate_N.json",
+		url: "static/cultivate_N_new.json",
 		type: "GET",
 		dataType: "json",
 		timeout: QUERY_SERVICE_TIMEOUT
