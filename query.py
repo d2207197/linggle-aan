@@ -1,6 +1,22 @@
 # -*- coding: utf-8 -*-
 from time import ctime
 import socket,sqlite3
+import pickle,os
+
+CLUSTER_ROOT = ['/corpus/Linggle/', '']
+##=============cluster data loading===================
+for path in CLUSTER_ROOT:
+    # print path
+    if os.path.exists(path):
+        CLUSTER_ROOT_PATH = path
+        break
+    else:
+        CLUSTER_ROOT_PATH = ''
+
+##load the similar word cluster list from joanne
+A_Sim = pickle.load(open(CLUSTER_ROOT_PATH +"joanne_syno_adj.pick",'r'))
+N_Sim = pickle.load(open(CLUSTER_ROOT_PATH +"joanne_syno_noun.pick",'r'))
+V_Sim = pickle.load(open(CLUSTER_ROOT_PATH +"joanne_syno_verb.pick",'r'))
 
 def checkIfallStar(query_in):
     # check whether the query would be transformed into all star
@@ -26,17 +42,39 @@ def checkIfallStar(query_in):
         return False
 
 
-def getParaphrase(word, pos = ""):
-    ##get paraphrase candidate from Patric Pantel database
-    Score_T = 0.05
-    conn = sqlite3.connect("databases/PatricPantel.db3")
-    cursor = conn.cursor()
-    if len(pos) == 0:
-        SQL = "select SimWord,score from PatricPantel where head =='%s' and score > %f order by score desc" % (word,Score_T)
-        candidates = [(word,1.0)] + [(data[0].lower(),data[1]) for data in cursor.execute(SQL).fetchall()]
-        conn.close()
-    return candidates
+##def getParaphrase(word, pos = ""):
+##    ##get paraphrase candidate from Patric Pantel database
+##    Score_T = 0.05
+##    conn = sqlite3.connect("databases/PatricPantel.db3")
+##    cursor = conn.cursor()
+##    if len(pos) == 0:
+##        SQL = "select SimWord,score from PatricPantel where head =='%s' and score > %f order by score desc" % (word,Score_T)
+##        candidates = [(word,1.0)] + [(data[0].lower(),data[1]) for data in cursor.execute(SQL).fetchall()]
+##        conn.close()
+##    return candidates
 
+def getParaphrase(word, pos = ""):
+    ##get paraphrase candidate from joanne's list
+    Score_T = 0.05
+    candidates = []
+    if len(pos) == 0:
+        if word in A_Sim:
+            candidates.extend(A_Sim[word])
+        if word in V_Sim:
+            candidates.extend(V_Sim[word])
+        if word in N_Sim:
+            candidates.extend(N_Sim[word])
+
+        candidates = [data for data in candidates if data[1] > Score_T]
+
+    ##因為字可能會重複，只留機率最高的做為參考
+    temp_dic = {}
+    candidates.sort(key = lambda x:x[1])
+    for word,score in candidates:
+        temp_dic[word] = score ##之後如果有出現更大的相似度可以蓋過
+
+    candidates = temp_dic.items()
+    return [(word,1.0)] + candidates
 
 def getRotateNgramResults(query):
     query = query.replace("%20", " ")
@@ -65,18 +103,18 @@ def getRotateNgramResults(query):
 def getSearchResults_Inside(query_in):
     print "prepare to submit query"
     Search_Result = []
-    
+
     ##transform the query into Joanne's server
     words = query_in.split()
     words2 = []
     word_filter = {} ##記錄某個位子只能用哪些字
     mark_list =[]  ##記錄哪幾個位置要變色
     sim_posi = -1 ##記錄第一個相似詞的位置
-    
+
     for i in range(len(words)):
 
         word = words[i]
-        
+
         if word == "*":##有特殊語法
             words2.append("*")
             mark_list.append(i)
@@ -85,7 +123,7 @@ def getSearchResults_Inside(query_in):
             if sim_posi == -1:
                 sim_posi = i
                 print "sim_posi",sim_posi
-                
+
             paraphrases = getParaphrase(word[1:]) #[(w1,score1),(w2,socre2),...]
 
             if len(paraphrases) == 1: ##找不到就查自己就好
@@ -93,9 +131,9 @@ def getSearchResults_Inside(query_in):
                 word_filter[i] = {word[0][1:]:1.0}
             else:
                 words2.append("*")
-                word_filter[i] = dict([(data[0],data[1]) for data in paraphrases])                
+                word_filter[i] = dict([(data[0],data[1]) for data in paraphrases])
             mark_list.append(i)
-            
+
         elif word.count("|") > 0:
             #words2.append("*")
             words2.append(word)
@@ -107,9 +145,9 @@ def getSearchResults_Inside(query_in):
                 mark_list.append(i)
 
     query_out = " ".join(words2)
-    
+
     print "submit query",ctime()
-    temp_Result = [[data[0].split(),data[1]] for data in getRotateNgramResults(query_out) if len(data) == 2 and len(data[0].split()) > 0]    
+    temp_Result = [[data[0].split(),data[1]] for data in getRotateNgramResults(query_out) if len(data) == 2 and len(data[0].split()) > 0]
     print "get result",ctime()
     ##start filtering
     for posi in word_filter:
@@ -136,8 +174,8 @@ def getSearchResults_Inside(query_in):
             sim_word = data[0][sim_posi]
             sim_score = word_filter[sim_posi][sim_word.replace('<strong>','').replace("</strong>","")]
             Search_Result.append((words,freq,sim_score))
-            
-    return Search_Result   
+
+    return Search_Result
 
 
 def query_extend(query_in):
@@ -155,7 +193,7 @@ def query_extend(query_in):
             queries.extend(
                 [data + [star] for data in queries for star in starlist])
         elif word[0] == "?":
-            if len(word) == 1:  # 只有問號
+            if len(word) == 1:  # 只有問號
                 queries.extend([data + ["*"] for data in queries])
             else:
                 queries.extend([data + [word[1:]]
