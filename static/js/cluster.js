@@ -8,8 +8,12 @@ function _show_clustering_results(data)
 	// cluster_container.html('');
 	var k = 0;
 	$.each(data, function(cidx, c){
+
+
+
 		// get cluster label, e.g., relationship
 		var layer1 = c.data;
+		// if(!layer1)return;
 		var cid = 'c' + (k).toString();
 		if(k % 2 == 0)cluster_theme = 'cluster-even';
 		else cluster_theme = 'cluster-odd';
@@ -41,7 +45,6 @@ function _show_clustering_results(data)
 
 			var layer2 = c2.data;
 
-			console.log('current >',k);
 			var bglayer2 = k % 2 == 0 ? "" : "layer2-interleve"
 
 

@@ -219,6 +219,9 @@ function events()
 	// CLUSTER TAG EVENT
 	attach_cluster_tag_event();
 
+	// CLUSTER TOGGLE EVENT
+	attach_cluster_toggle_event();
+
 	$(".ngram").live("click",function(){
 		$(this).find(".expand-example").click();
 	});
@@ -346,39 +349,42 @@ function _clear_previous_results()
 	$('#normal-result-container').html('');
 }
 
+var RECV_DATA;
+var cluster_idx = false;
+var normal_idx = false;
+var content_mode = 'cluster';
+
 /// fetch data from wujc, including cluster/tratitional results
 function fetch_worker(server, query)
 {
 	var request = $.ajax({
-		url: server + query,
+		// url: server + query,
 		// url: 'static/A_beach.json',
-		// url: "static/cultivate_N_new.json",
+		url: "static/cultivate_N_new.json",
 		type: "GET",
 		dataType: "json",
 		timeout: QUERY_SERVICE_TIMEOUT
 	});
+
 	request.done(function(recv){
-		var mode = recv[0];
-		var data = recv[1];	    	
 
-		_clear_previous_results()
+		// store the received data
+		RECV_DATA = recv;
+		cluster_idx = false;
+		normal_idx = false;
 
-		if(mode == 'new')
+		if (recv.length == 1)
 		{
-			_show_clustering_results(data);
+			normal_idx = 0
+		}else if (recv.length == 2){
 
-			$('#normal-result-container').addClass('hide');
-			$('#cluster-result-container').removeClass('hide');
-			
+			cluster_idx = recv[0][0] == 'new' ? 0 : 1
+			normal_idx = 1 - cluster_idx
+		}else{
+			console.error('invalid recv data:',recv)
 		}
-		else if(mode == 'old')
-		{
-			_show_traditional_results(data);
-
-			$('#cluster-result-container').addClass('hide');
-			$('#normal-result-container').removeClass('hide');				
-			_bar_animater(BAR_ANIMATE); 	// animate
-		}
+		// default "cluster"
+		fill_content(content_mode);
 		layout(); 			// adjust layout
 		
 	});
@@ -421,6 +427,44 @@ function fetch_worker(server, query)
 		}		
 	});
 }
+function fill_content(content_mode)
+{
+	_clear_previous_results();
+
+	if(content_mode == 'cluster' && cluster_idx)
+	{
+		var data = RECV_DATA[cluster_idx][1];
+		_show_clustering_results(data);
+		$('#normal-result-container').addClass('hide');
+		$('#cluster-result-container').removeClass('hide');			
+	}
+	else if(content_mode == 'normal' || (content_mode == 'cluster' && !cluster_idx) )
+	{
+		var data = RECV_DATA[normal_idx][1];
+		_show_traditional_results(data);
+		$('#cluster-result-container').addClass('hide');
+		$('#normal-result-container').removeClass('hide');			
+	}	
+}
+function attach_cluster_toggle_event()
+{
+	$('#cluster-toggle').click(function(){
+		if(content_mode == 'cluster')
+		{
+			content_mode = 'normal';
+			
+		}else if(content_mode == 'normal')
+		{
+			// if cluster results exists
+			if(cluster_idx)
+			{
+				content_mode = 'cluster';
+			}
+		}
+		fill_content(content_mode);
+	});
+}
+
 function query()
 {
 	var server = "query/";
