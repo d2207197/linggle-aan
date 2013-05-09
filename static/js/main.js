@@ -527,7 +527,11 @@ function _show_traditional_results(data)
 		var item_ngram = $('<td/>').addClass('item-ngram').appendTo(item);
 
 		$('<div/>').addClass('item-ngram-text').html(obj.phrase).appendTo(item_ngram);
-		$('<div/>').addClass('item-bar').css("width", restore(obj.percent)*400).appendTo(item_ngram);
+
+		// percent(>1 gram) or similarity(for unigram)
+		var score = obj.percent.indexOf("%") > -1 ? restore(obj.percent) : obj.percent;
+		
+		$('<div/>').addClass('item-bar').css("width", score*400).appendTo(item_ngram);
 
 		var item_portion = $('<td/>').addClass('item-portion').text(obj.percent).appendTo(item);
 		var item_count = $('<td/>').addClass('item-count').text(obj.count_str).appendTo(item);
