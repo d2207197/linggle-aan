@@ -576,15 +576,28 @@ def query(query):
 				POS_Candi = "n"
 				
 			Sim_Dic = Joanne_Sim_Map_Dic[POS_Candi] ##使用對應的字典
+
+			try:
+				clusters = Sim_Dic[query_word]
+			except:
+				clusters = []
 			
 			##先產生傳統 (non-cluster)的結果
 			Result = []
+			
+			for cluster in clusters:
+				for sub_cluster in cluster:
+					Result.extend(sub_cluster)
+
+			##格式化
+						
+			Result.sort(key = lambda x:x[1], reverse = True)
+			
+			Result = [{"count":0,"phrase":data[0],"percent":str(data[1]).strip(),"count_str":""} for data in Result]
+					
 			Final_Result.append(("old",Result))
 			
 			##產生 cluster 的結果
-			Result = []	
-			clusters = Sim_Dic[query_word]
-
 			Result_Clusters = []
 
 			for cluster in clusters:
