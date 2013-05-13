@@ -71,11 +71,11 @@ adj_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'new_syno_adj_scores.p
 
 ## clusters of Similar Noun
 logger.debug('Load new_syno_noun_scores.pick')
-verb_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'new_syno_noun_scores.pick','r').read())
+noun_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'new_syno_noun_scores.pick','r').read())
 
 ## clusters of Similar Verb 
 logger.debug('Load new_syno_verb_scores.pick')
-noun_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'new_syno_verb_scores.pick','r').read())
+verb_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'new_syno_verb_scores.pick','r').read())
 
 logger.debug('Init WordNetLemmatizer')
 lemmatizer = WordNetLemmatizer()
