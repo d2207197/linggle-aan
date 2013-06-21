@@ -37,21 +37,32 @@ for path in CLUSTER_ROOT:
     else:
         CLUSTER_ROOT_PATH = ''
 
-vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick','r').read())
+
+import pymongo
+mc =  pymongo.MongoClient('moon.nlpweb.org')
+mc.admin.authenticate('nlplab', 'nlplab634')
+cluster = mc.cluster
+
+# vo_clusters_dic = pickle.loads(open( CLUSTER_ROOT_PATH + 'cluster_vo_large.pick','r').read())
+def vo_clusters(word):
+    global mc
+    return mc.cluster.VO_large.find_one({ 'word': 'conjure' }, {'_id':0,'cluster': 1})['cluster']
+
+
 #vs_clusters_dic = pickle.loads(open('cluster_vs_large.pick','r').read())
 #ov_clusters_dic = pickle.loads(open('cluster_ov_large.pick','r').read())
 
 lemmatizer = WordNetLemmatizer()
 
-def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
+# def connect_db():
+#     return sqlite3.connect(app.config['DATABASE'])
 
 
-def init_db():
-    with closing(connect_db()) as db:
-        with app.open_resource('schema.sql') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
+# def init_db():
+#     with closing(connect_db()) as db:
+#         with app.open_resource('schema.sql') as f:
+#             db.cursor().executescript(f.read())
+#         db.commit()
 
 def compare(x,y):
     if x[2] > y[2]:
@@ -79,14 +90,14 @@ def ConvertFreq(freq):
         freq_str = str(int(freq)).strip()    
     return freq_str
 
-@app.before_request
-def before_request():
-    g.db = connect_db()
+# @app.before_request
+# def before_request():
+#     g.db = connect_db()
 
 
-@app.teardown_request
-def teardown_request(exception):
-    g.db.close()
+# @app.teardown_request
+# def teardown_request(exception):
+#     g.db.close()
 
 
 @app.route('/')                 # Linggle Homepage
@@ -219,7 +230,8 @@ def query(query):
                 total_no += data[1]
 
             ##取得 cluster 狀況
-            clusters = vo_clusters_dic[query_in[0]]            
+            # clusters = vo_clusters_dic[query_in[0]]            
+            clusters = vo_cluster(query_in[0])
             Result_Clusters = []
             
             for cluster in clusters:
@@ -347,7 +359,7 @@ if __name__ == '__main__':
         app_options["use_debugger"] = False
         app_options["use_reloader"] = False
         app_options["host"] = "0.0.0.0"
-        print "yes"
+        # print "yes"
 
     app.run(**app_options)
  
