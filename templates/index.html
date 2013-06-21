@@ -20,6 +20,7 @@
 	<link type="text/css" rel="stylesheet" href="static/css/main.css" />
 	<link type="text/css" rel="stylesheet" href="static/css/utility.css" />
 	<link type="text/css" rel="stylesheet" href="static/css/cluster.css" />
+	<link type="text/css" rel="stylesheet" href="static/css/traditional.css" />
 
 	<!-- jQuery -->
 	<script type="text/javascript" src="static/js/jquery.js"></script>
@@ -28,6 +29,7 @@
 	<script type="text/javascript" src="static/js/utility.js"></script>
 
 	<script type="text/javascript" src="static/js/layout.js"></script>
+	<script type="text/javascript" src="static/js/example.js"></script>
 	<script type="text/javascript" src="static/js/cluster.js"></script>
     <script type="text/javascript" src="static/js/main.js"></script>
 
@@ -48,6 +50,7 @@
 					<img id="logo-linggle" src="static/img/linggle.png"/>
 					<img id="logo-square" src="static/img/square.png"/>
 				</div>
+				
 				<div id="search-container">
 					<table id="search-table" cellspacing="0" cellpadding="0">
 						<tr>
@@ -76,21 +79,26 @@
 						<img src="static/img/search.png"/>
 					</button>
 
-					<div id="search-example">Example</div>
+					<!-- <div id="search-example">Example</div> -->
 					<div id="search-help">Help</div>
+					<button id="cluster-toggle" class="normal-mode hide">cluster</button>
+
 
 					<div id="search-loading"><img src="static/img/loading.gif"></div>
 				</div>
+
 			</div>
 		</div>
 		<div id="content">
 			<div id="cmd-convert-result"></div>
 
-			<div id="result-block-container"  class="hide">
+			<div id="cluster-result-container" class="result-container hide">
+				<div id="tip" class="f hide">@ Tip : In each bubble, <em>very</em> similar words are grouped togheter under the same tint!</div>
 				<div id="cluster-type-container"><!-- preserve for cluster type (VN, AN) --></div>
 				<div id="cluster-tag-container"></div>
 				<div id="clusters-container" class="f"></div>
 			</div>
+			<table id="normal-result-container" cellspacing="0" cellpadding="0"></table>
 			<table id="result-block"  cellspacing="0" cellpadding="0"  class="hide"></table>
 		</div>
 		<div id="content-mask"></div>

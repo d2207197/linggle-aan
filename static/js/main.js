@@ -22,7 +22,8 @@ var SENT_SERVICE_TIMEOUT = 10000;
 
 // UI CONTROL
 var RESULT_COL = 0; 	// # of cols in a result block
-var BAR_ANIMATE = 1000;
+// var BAR_ANIMATE = 1000;
+var BAR_ANIMATE = 0;
 // ------------------------------------------------------------------------------ //
 $(document).ready(function(){
 	// console.log("XD");
@@ -50,7 +51,7 @@ function init() // a page load (ajax)
 
 	layout();						// set layout
 	exampleHandler(EXAMPLE_STATE);	// example show/hide
-
+	
 	// console.log(test());
 }
 function adjustBrowser()
@@ -212,39 +213,15 @@ function events()
 		redirect("", "CMD");
 	});
 
+	// EXAMPLE EVENTS
+	attach_example_fetch_events();
 
-	// EXAMPLE SENTENCE EVENT
-	$(".expand-example").live('click',function(e){
+	// CLUSTER TAG EVENT
+	attach_cluster_tag_event();
 
-		var ngramText = $(this).parents(".ngram").find(".phrase-container").find(".text").text();
-		var anchor = $(this);
-		$.ajax({
-		    url: "examples/" + ngramText,
-		    dataType: "json",
-		    // data:"ngram="+ngramText,
-		    type: "GET",
-		    timeout: SENT_SERVICE_TIMEOUT, // reset timeout!!!!
-		    success: function(exampleSents) {
-		    	// console.log(exampleSents);
-		    	var exSents = exampleSents.Examples;
+	// CLUSTER TOGGLE EVENT
+	attach_cluster_toggle_event();
 
-		    	fillExampleSents(exSents, anchor, ngramText);
-
-
-		    	// alert(ngram)
-
-		    },
-		    complete: function(data) {},
-		    error: function(x, t, m) { if(t==="timeout") {/*console.log("got timeout");*/} else {/*console.log(t);*/} }
-		});
-		e.stopPropagation(); // prevent trigger parent event, or may cause loop trigger
-	});
-	$(".note-container").live("click",function(){
-		// if(EXAMPLE_SENT == 'on'){
-			// alert("XD");
-			$(this).parent().find(".expand-example").click();
-		// }
-	});
 	$(".ngram").live("click",function(){
 		$(this).find(".expand-example").click();
 	});
@@ -266,7 +243,7 @@ function fillExampleSents(sents, anchor, ngramText)
 	if(tr.hasClass("expand"))
 	{
 		ref = tr;
-		// expand example
+		// expand multi example
 		$.each(sents, function(i){
 			if($.trim(sents[i]).length > 0 )
 			{
@@ -357,23 +334,7 @@ function choose(idx)
 	var query = _target.find(".option").html().split("<span>")[0];
 	$("#search-bar").val(query);
 }
-function getExampleSent(ngram)
-{
-	$.ajax({
-	    url: "examples/",
-	    dataType: "json",
-	    data:"ngram="+ngram,
-	    type: "GET",
-	    timeout: SENT_SERVICE_TIMEOUT, // reset timeout!!!!
-	    success: function(exampleSents) {
-	    	alert(exampleSents);
-	    	// getPatternResult(server, query);
 
-	    },
-	    complete: function(data) {},
-	    error: function(x, t, m) { if(t==="timeout") {/*console.log("got timeout");*/} else {/*console.log(t);*/} }
-	});
-}
 function showMsg(msg)
 {
 	var tr = $("<tr/>").addClass("block").appendTo($("#result-block"));
@@ -385,93 +346,139 @@ function _clear_previous_results()
 {
 	$('#cluster-tag-container').html('');
 	$('#clusters-container').html('');
-	$('#result-block').html('');
-
-
+	$('#normal-result-container').html('');
 }
-function getPatternResult(server, query)
+
+var RECV_DATA;
+var cluster_idx = false;
+var normal_idx = false;
+var content_mode = 'cluster';
+
+/// fetch data from wujc, including cluster/tratitional results
+function fetch_worker(server, query)
 {
-	// alert(query);
-	$.ajax({
-	    url: server + query,
-	    // url: "static/go_home.json",
-	    // url: "static/cultivate_N.json",
-	    type: "GET",
-	    dataType: "json",
-	    timeout: QUERY_SERVICE_TIMEOUT, // 15 sec
-	    success: function(recv) {
+	$('#cluster-toggle').hide(0);
+	var request = $.ajax({
+		url: server + query,
+		// url: 'static/A_beach.json',
+		// url: "static/cultivate_N_new.json",
+		type: "GET",
+		dataType: "json",
+		timeout: QUERY_SERVICE_TIMEOUT
+	});
 
-			var mode = recv[0];
-			var data = recv[1];	    	
+	request.done(function(recv){
 
-			_clear_previous_results()
+		// store the received data
+		RECV_DATA = recv;
+		cluster_idx = false;
+		normal_idx = false;
 
-			if(mode == 'new')
-			{
-				_extract_cluster(data);
-				$('#result-block').addClass('hide');
-				$('#result-block-container').removeClass('hide');
-				
-			}
-			else if(mode == 'old')
-			{
-				// console.log(data);
-				showResult(data);
-				$('#result-block-container').addClass('hide');
-				$('#result-block').removeClass('hide');				
-			}			
-/////// 
-/////// IMPLEMENT THE NEW QUERY HERE
-/////// ..........
-/////// ..........
-///////
+		if (recv.length == 1)
+		{
+			normal_idx = 0
+		}else if (recv.length == 2){
 
-			 	// show data
-			layout(); 			// adjust layout
-			fill(BAR_ANIMATE); 		// animate
-	    },
-	    complete: function(data) {
+			cluster_idx = recv[0][0] == 'new' ? 0 : 1
+			normal_idx = 1 - cluster_idx
+			$('#cluster-toggle').show(0);
+		}else{
+			console.error('invalid recv data:',recv)
+		}
+		// default "cluster"
+		fill_content(content_mode);
+		layout(); 			// adjust layout
+		
+	});
+	request.error(function(x, t, m){
+		if(t==="timeout") {
+			showMsg("system overloaded, please try again later.");
+        } else {
+			showMsg("internal server error, please try again later.");
+        }
+	});
 
-			// no matter success or error, close loading img
-			$("#search-loading").find("img").hide(0);
+	request.complete(function(data){
+		// no matter success or error, close loading img
+		$("#search-loading").find("img").hide(0);
 
-			// console.log(data.responseText);
+		if(data.readyState != 4)
+		{
+			///// ------------------ /////
+			///// Modify the message /////
+			///// ------------------ /////
+			// show no result
+			showMsg("no result.");
 
-			if(data.responseText.length <= 2)
-			{
+			// show try HLI or try CMD
+			// if(MODE == "CMD") var text = "Try Human Input";
+			// else var text = "Try Command Mode";
 
-				// show no result
-				showMsg("no result.");
+			// $("<span/>").text(text).attr('id','try-'+_MODE).insertAfter('#result-block').click(function(){
+			// 	redirect(query,_MODE);
+			// });	
 
-				// show try HLI or try CMD
-				if(MODE == "CMD") var text = "Try Human Input";
-				else var text = "Try Command Mode";
-
-				$("<span/>").text(text).attr('id','try-'+_MODE).appendTo(td).click(function(){
-					redirect(query,_MODE);
+		}else{
+			// show command convert result
+	    	if(MODE == "HLI") {
+				$('#cmd-convert-result').text("Command:");
+				$("<span/>").text(query).appendTo($('#cmd-convert-result')).click(function(){
+					redirect(encodeURIComponent(query),"CMD");
 				});
-
-			}else{
-				// show command convert result
-		    	if(MODE == "HLI") {
-					$('#cmd-convert-result').text("Command:");
-					$("<span/>").text(query).appendTo($('#cmd-convert-result')).click(function(){
-						redirect(encodeURIComponent(query),"CMD");
-					});
-				}
 			}
-	    },
-	    error: function(x, t, m) {
-	        if(t==="timeout") {
-				showMsg("got timeout...");
-	            // console.log("got timeout");
-	        } else {
-	        	showMsg("internal server error. :(");
-	            // console.log(t);
-	        }
-	    }
+		}		
 	});
 }
+function fill_content(content_mode)
+{
+	_clear_previous_results();
+
+	$('#cluster-toggle').removeClass('normal-mode cluster-mode');
+
+	if(content_mode == 'cluster' && cluster_idx)
+	{
+		var data = RECV_DATA[cluster_idx][1];
+		_show_clustering_results(data);
+		$('#normal-result-container').addClass('hide');
+		$('#cluster-result-container').removeClass('hide');	
+		$('#cluster-toggle').addClass('cluster-mode');
+	}
+	else if(content_mode == 'normal' || (content_mode == 'cluster' && !cluster_idx) )
+	{
+		var data = RECV_DATA[normal_idx][1];
+		_show_traditional_results(data);
+		$('#cluster-result-container').addClass('hide');
+		$('#normal-result-container').removeClass('hide');
+		$('#cluster-toggle').addClass('normal-mode');			
+	}	
+}
+function attach_cluster_toggle_event()
+{
+
+	$('#cluster-toggle').click(function(){
+
+		if(content_mode == 'cluster')
+		{
+			// cluster -> normal
+
+			$('#tip').hide(0);
+			content_mode = 'normal';
+			
+		}else if(content_mode == 'normal')
+		{
+			// if cluster results exists
+			if(cluster_idx)
+			{
+				content_mode = 'cluster';
+				// $(this).addClass('cluster-mode');
+			}else{
+				// $(this).addClass('normal-mode');
+			}
+		}
+		fill_content(content_mode);
+	});
+}
+
 function query()
 {
 	var server = "query/";
@@ -488,17 +495,18 @@ function query()
 
 	if(MODE == 'CMD')
 	{
-		getPatternResult(server, encode_query);
+		fetch_worker(server, encode_query);
 
 	}else if(MODE == 'HLI')
-	{
+	{	
+		// convert the Human-Input query into Command
 		$.ajax({
 		    url: "sent/"+encode_query,
 		    type: "GET",
 		    timeout: SENT_SERVICE_TIMEOUT,
 		    success: function(query) {
-		    	getPatternResult(server, query);
-
+		    	// fetch result using command query
+		    	fetch_worker(server, query);
 		    },
 		    complete: function(data) {},
 		    error: function(x, t, m) { if(t==="timeout") {/*console.log("got timeout");*/} else {/*console.log(t);*/} }
@@ -507,7 +515,34 @@ function query()
 
 
 }
-function showResult(data)
+function _show_traditional_results(data)
+{
+
+	var result_container = $('#normal-result-container');
+
+	$.each(data, function(i, obj){
+
+		var item = $("<tr/>").addClass('item').appendTo(result_container);
+
+		var item_ngram = $('<td/>').addClass('item-ngram').appendTo(item);
+
+		$('<div/>').addClass('item-ngram-text').html(obj.phrase).appendTo(item_ngram);
+
+		// percent(>1 gram) or similarity(for unigram)
+		var score = obj.percent.indexOf("%") > -1 ? restore(obj.percent) : obj.percent;
+		
+		$('<div/>').addClass('item-bar').css("width", score*400).appendTo(item_ngram);
+
+		var item_portion = $('<td/>').addClass('item-portion').text(obj.percent).appendTo(item);
+		var item_count = $('<td/>').addClass('item-count').text(obj.count_str).appendTo(item);
+
+		var item_example = $('<td/>').addClass('item-example').appendTo(item);
+		$('<img/>').attr('src','static/img/example-btn.png').appendTo(item_example);
+		$('<img/>').addClass('hide').attr('src','static/img/example-btn-shrink.png').appendTo(item_example);
+
+	});
+}
+function _show_traditional_results_old(data)
 {
 	// clear current result
 	$("#result-block").html("");
@@ -529,19 +564,10 @@ function showResult(data)
 			// extract results
 			var block = $("<tr/>").attr("index",i).addClass("block ngram").appendTo($("#result-block"));
 
-			// note container
-			// var note = $("<td/>").addClass("note-container").appendTo(block);
-			// $("<img/>").addClass("note-img").attr("src","static/img/note.png").appendTo(note);
-
 			// pharse container
 			var phraseContainer = $("<td/>").addClass("phrase-container").appendTo(block);
 			$("<div/>").addClass("text").html(data[i].phrase).appendTo(phraseContainer);
-			// alert(restore(data[i].percent));
 
-			// phraseWidth = parseInt($('.phrase-container').css('width'))
-			// console.log('phraseWidth:',phraseWidth)
-			// console.log('percent:',restore(data[i].percent))
-			// console.log('bar:',restore(data[i].percent)*phraseWidth)
 			var bar = $("<div/>").addClass("bar").attr("length", restore(data[i].percent)*580).appendTo(phraseContainer);
 
 			// count container
@@ -581,7 +607,8 @@ function restore(p) // 89 % -> 0.89
 		return 0.01;
 	}
 }
-function fill(delay)
+/// perform filling the bar with pre-defined delay
+function _bar_animater(delay)
 {
 	$.each($(".bar"), function(i){
 		$(".bar").eq(i).animate({
@@ -649,7 +676,6 @@ function setMode()
 		$("#mode-container").addClass("no-speech");
 	}
 
-
 	// change examples
 	$(".option-container").parent().remove();
 	var ex = EXAMPLE[MODE];
@@ -677,6 +703,7 @@ function setMode()
 	});
 }
 
+// detect the current status, send the query if it is necessary 
 function infofetch()
 {
 	var params = location.hash.split('#');

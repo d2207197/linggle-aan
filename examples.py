@@ -5,6 +5,14 @@ import vf_to_vb
 import os
 from subprocess import Popen, PIPE
 
+EXAMPLE_ROOT = ['/home/nlplab/joanne/NY/', 'examples/']
+for path in EXAMPLE_ROOT:
+	if os.path.exists(path):
+		EXAMPLE_ROOT = path
+		break
+	else:
+		EXAMPLE_ROOT = ''
+
 def get_Examples(ngram):
 	string = ngram
 	ngram = ngram.split()
@@ -13,7 +21,7 @@ def get_Examples(ngram):
 	for x in ngram:
 		if flag==0:
 			try:
-				rep = "/home/nlplab/joanne/NY/noun_example_base/"+noun_forms.d2[x.lower()]
+				rep = EXAMPLE_ROOT + "noun_example_base/"+noun_forms.d2[x.lower()]
 				f =open(rep)
 				flag = 1
 				rap = rep
@@ -42,7 +50,7 @@ def get_Examples(ngram):
 			#		print a
 					if a== 'VBD/VBN':
 						a="VBDVBN"
-					rep = "/home/nlplab/joanne/NY/example_base/"+bf+"/"+a
+					rep = EXAMPLE_ROOT + "example_base/"+bf+"/"+a
 					f = open(rep)
 					flag = 1
 			#		print "verbs!!!!"
@@ -65,6 +73,8 @@ def get_Examples(ngram):
 
 
 if __name__ == '__main__':
+
+
 	a = "include a person"
 	print
 	print get_Examples(a)

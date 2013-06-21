@@ -1,5 +1,6 @@
 function layout()
 {
+
 	// get browser size
 	var s = detectBrowserSize();
 
@@ -17,4 +18,18 @@ function layout()
 	$(".option-container").last().addClass("option-container-last");
 
 	$("#help-container").css("left",($("#container").innerWidth() - $("#help-container").outerWidth())/2);
+
+	check_style();
+}
+function check_style()
+{
+	var isMacLike = navigator.userAgent.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
+
+	if(isMacLike)
+	{
+		$('#header-container').addClass('header-container-apple');
+		// $('.cluster-odd').addClass('cluster-odd-apple');
+		// $('.cluster-even').addClass('cluster-even-apple');
+		// console.log(isMacLike);
+	}	
 }
