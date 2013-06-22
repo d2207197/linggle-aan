@@ -22,7 +22,6 @@ import happybase
 from itertools import  islice
 from heapq import heapify, heapreplace, heappop
 from functools import  total_ordering
-import pdb
 
 
 LOGGER = logging.getLogger('report')

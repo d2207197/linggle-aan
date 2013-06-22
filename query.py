@@ -64,6 +64,7 @@ def A_Sim(word):
     out = mc.synonyms.adj.find_one({"word": word}, {'_id':0 , 'synonyms_flat':1})
     if out: return out['synonyms_flat']
     else: return []
+
 def N_Sim(word):
     out = mc.synonyms.adj.find_one({"word": word}, {'_id':0 , 'synonyms_flat':1})
     if out: return out['synonyms_flat']
@@ -245,7 +246,7 @@ def similar_query_split(query_in):
     for i in range(len(words)):
         word_now = words[i]
         if i == target_posi:
-            queries = [data + [data2] for data in queries for data2 in similars[0][1][:10]]  # 先做前十名就好
+            queries = [data + [data2[0]] for data in queries for data2 in similars[0][1][:10]]  # 先做前十名就好
         else:  # 照原字
             queries = [data + [word_now] for data in queries]
 
