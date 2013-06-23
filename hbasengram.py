@@ -57,32 +57,47 @@ class HBaseCol():
 
 class HBaseQuery():
     '''Class for construct a hbase query'''
-    def __init__(self, text = None, cols=None):
+    def __init__(self, text = None, col=None, filters = None, step=False, append = False):
         if text == None:
-            text = []
-        if cols == None:
-            cols = [HBaseCol()]
+            self.text = []
+        else:
+            self.text = deepcopy(text)
 
-        self.text = text
-        self.cols = cols
+        if col == None:
+            self.col = HBaseCol()
+        else:
+            self.col = deepcopy(col)
+            
+        if filters == None:
+            self.filters = []
+        else:
+            self.filters = deepcopy(filters)
+
+
+        if step:
+            if append:
+                col.poss.append(col.next_pos)
+            col.next_pos += 1
+    
 
     def __iter__(self):
         yield self.text
-        yield self.cols
+        yield self.col
+        yield self.filters
 
     def __deepcopy__(self, memo):
-        return HBaseQuery(deepcopy(self.text, memo), deepcopy(self.cols, memo))
+        return HBaseQuery(self.text, self.col, self.filters)
         # elif name == 'next_pos': self[2] = value
 
     def rowkey(self):
         return ' '.join(self.text) + '|'
 
-    def columns(self):
+    def column(self):
         text_length = str(len(self.text))
-        return map(lambda p: text_length + ':' + str(p), self.cols)
+        return text_length + ':' + str(self.col)
 
     def __str__(self):
-        return '<\'' + self.rowkey() + '\', ' +  str(self.columns()) + '>'
+        return '<\'{}\', {}, {}>'.format(self.rowkey(), self.column(), self.filters)
 
     def __repr__(self):
         return self.__str__()
@@ -108,7 +123,8 @@ class Query():
     def __init__(self, toks):
         toks = toks[0][0::2]
 
-        self._querys = [HBaseQuery([], [HBaseCol([], 0)])]
+        # self._querys = [HBaseQuery([], [HBaseCol([], 0)])]
+        self._querys = [HBaseQuery()]
 
         LOGGER.debug('init Query: {} '.format(self._querys))
         self._maybe = False
@@ -131,6 +147,9 @@ class Query():
                 LOGGER.debug('-> maybe')
                 self._maybe = True
                 continue
+            elif gram in ['v.', 'adj.', 'n.', 'adv.']:
+                LOGGER.debug('-> POS')
+                self._insert_POS(gram)
             elif gram == 'STOPHERE':
                 return
 
@@ -144,54 +163,90 @@ class Query():
             self._maybe = False
             LOGGER.debug('result: {}'.format(str(self)))
 
-    def _cols_step(self, cols, append=False):
+    def _col_step(self, col, append=False ):
         # LOGGER.debug('poss step start: {}'.format(cols))
-        to_del = []
-        for i, poss in enumerate(cols):
-            if poss.next_pos + 1 > 5:
-                to_del.append(i)
-                continue
-            if append:
-                poss.poss.append(poss.next_pos)
-            poss.next_pos += 1
-            # LOGGER.debug('poss: {}'.format(poss))
-        for i in reversed(to_del):
-            del cols[i]
+        # for i, poss in enumerate(cols):
+        if col.next_pos + 1 > 5:
+            return None
+            # to_del.append(i)
+            # continue
+        if append:
+            col.poss.append(col.next_pos)
+        col.next_pos += 1
+        return col
+        # LOGGER.debug('poss: {}'.format(poss))
+        # for i in reversed(to_del):
+        #     del cols[i]
 
     def _insert_wildcard(self):
-        for text, cols in self._querys:
-            if self._maybe:
-                orig_cols = deepcopy(cols)
-            self._cols_step(cols)
-            if self._maybe:
-                cols.extend(orig_cols)
+        to_del = []
+        if self._maybe:
+            orig_querys = deepcopy(self._querys)
+
+        for i, (text, col, filters) in enumerate(self._querys):
+                # orig_cols = deepcopy(cols)
+            if not self._col_step(col):
+                to_del.append(i)
+            # if self._maybe:
+                # cols.extend(orig_cols)
+        for i in reversed(to_del):
+            del self._querys[i]
+        if self._maybe:
+            self._querys.extend(orig_querys)
+
+
+    def _insert_POS(self, POS):
+        to_del = []
+        if self._maybe:
+            orig_querys = deepcopy(self._querys)
+
+        for i, (text, col, filters) in enumerate(self._querys):
+                # orig_cols = deepcopy(cols)
+            filters.append((col.next_pos, POS))
+            if not self._col_step(col):
+                to_del.append(i)
+            # if self._maybe:
+                # cols.extend(orig_cols)
+        for i in reversed(to_del):
+            del self._querys[i]
+        if self._maybe:
+            self._querys.extend(orig_querys)
+
 
     def _insert_any_wildcard(self):
-        for text, cols in self._querys:
-            new_cols = deepcopy(cols)
-            for offset in range(5 - len(text)):
-                self._cols_step(new_cols)
-                cols.extend(new_cols)
-                new_cols = deepcopy(new_cols)
+        new_querys = []
+        for i, (text, col, filters) in enumerate(self._querys):
+
+            new_col = self._col_step(deepcopy(col))
+            for offset in range(5 - col.next_pos +1):
+                if not new_col:
+                    break
+                new_querys.append(HBaseQuery(text, new_col, filters))
+                new_col = self._col_step(deepcopy(new_col))
+        self._querys.extend(new_querys)
+
 
     def _insert_alternatives(self, alts):
         new_querys = []
-
-        for text, cols in self._querys:
-            new_cols = deepcopy(cols)
-            self._cols_step(new_cols, append=True)
-
-            for alt in alts:
-                new_querys.append(
-                    HBaseQuery(text + [alt], cols=deepcopy(new_cols)))
-            del new_cols
-        del self._querys
-        self._querys = new_querys
+        try:
+            for i, (text, col, filters) in enumerate(self._querys):
+                for alt in alts:
+                    new_querys.append(HBaseQuery(text + [alt], col=self._col_step(deepcopy(col), append =True), filters = filters))
+            del self._querys
+            self._querys = new_querys
+        except Exception as e:
+            print e
 
     def _insert_word(self, word):
-        for text, cols in self._querys:
-            self._cols_step(cols, append=True)
-            text.append(word)
+        to_del = []
+        for i, (text, col, filters) in enumerate(self._querys):
+            if self._col_step(col, append=True):
+                text.append(word)
+            else:
+                to_del.append(i)
+        for i in reversed(to_del):
+            del self._querys[i]
+
 
     def __str__(self):
         return self.__repr__()
@@ -212,7 +267,9 @@ def queryparser():
     linggle query syntax -> hbase query'''
     word = Word(alphas + "'" + '.' + ',' + '.' + '<>')
     wildcard, any_wildcard, maybe = Literal('_'), Literal('*'), Literal('?')
-    atom = (word | wildcard | any_wildcard | maybe)
+    POS = (Literal('adj.')| Literal('n.')|Literal('v.')|Literal('adv.'))
+    atom = (word | wildcard | any_wildcard | maybe | POS)
+    
 
     query = operatorPrecedence(
         atom,
@@ -272,6 +329,12 @@ class Row():
 
 
 
+import pymongo
+mc = pymongo.MongoClient('moon.nlpweb.org')
+mc.admin.authenticate('nlplab', 'nlplab634')
+import pickle
+bncwordlemma = pickle.load(open('bncwordlemma.pick'))
+
 class HBaseNgram:
     def __init__(self, host, table):
         """
@@ -284,19 +347,24 @@ class HBaseNgram:
         for row in result:
              print row
         """
-        conn = happybase.Connection(host)
-        conn.open()
-        self._table = conn.table(table)
+        self.host = host
+        self.table = table
+        # conn = happybase.Connection(host)
+        # conn.open()
+        # self._table = conn.table(table)
+
+        global bncwordlemma
 
     def _merge(self, iterables):
         LOGGER.debug('iterables: {}'.format(iterables))
         h = []
         h.append
-        for itnum, it in enumerate(map(iter, iterables)):
+        for itnum, (it, filters) in enumerate([ (iter(iterable), filters) for iterable, filters in  iterables]):
             try:
                 next = it.next
-                # next()
-                h.append([Row.make_from_hbase(next()), itnum, next])
+                row = next()
+                row = Row.make_from_hbase(row)
+                h.append([row, filters, itnum, next])
             except StopIteration:
                 pass
         # LOGGER.debug('heap: {}'.format (h))
@@ -307,9 +375,12 @@ class HBaseNgram:
             try:
                 while True:
                     # raises IndexError when h is empty
-                    v, itnum, next = s = h[0]
+                    v, filters, itnum, next = s = h[0]
                     # yield self._to_row_for_use(v)
-                    yield v
+                    row_filter = partial(self._filter, row = v)
+                    # print v
+                    if all(map(row_filter, filters)):
+                        yield v
                     # raises StopIteration when exhausted
                     s[0] = Row.make_from_hbase(next())
                     # restore heap condition
@@ -320,12 +391,39 @@ class HBaseNgram:
                 heappop(h)
             except IndexError:
                 return
+                
+    def _filter(self,  flt, row):
+        word = row.ngram[flt[0]]
+        # try:
+        #     POSs = self.mc.BNC.bncwordlemma.aggregate([{"$match": {'word': word}}, {"$unwind": "$lemmas"}, {"$match": {'lemmas.%': {'$gt': 0.3}}}, {'$group': { '_id': '', 'POSs': {'$push': '$lemmas.POS'} }}])['result'][0]['POSs']
+        # except IndexError:
+        #     return False
+        global bncwordlemma
+        from operator import itemgetter
+        try:
+            POSs = map(itemgetter(1), bncwordlemma[word])
+        except KeyError:
+            return False
+        trans = {'adj.': 'a', 'adv.': 'r', 'v.': 'v', 'n.': 'n'}
+        # print POSs, word, flt, row
+
+        if trans[flt[1]] in POSs:
+            return True
+        return False
 
     def _scan(self, query, limit):
-        return self._table.scan(
+        conn = happybase.Connection(self.host)
+        conn.open()
+        print 'scanning: {} {}'.format(query.rowkey(), query.column())
+        # return self._table.scan(
+
+        rows = list(conn.table(self.table).scan(
             row_prefix=query.rowkey(),
-            columns=query.columns(),
-            limit=limit )
+            columns=[query.column()],
+            limit=limit ))
+        print 'scanned: {} {}'.format(query.rowkey(), query.column())
+
+        return rows, query.filters
 
 
     def _to_row_for_heap(self,res):
@@ -362,11 +460,14 @@ class HBaseNgram:
         query += ' STOPHERE'
         querys = parser.parseString(query)[0]
         LOGGER.debug('querys: {}'.format(querys))
-        limited_scan = partial(self._scan, limit = limit)
-        results = map (limited_scan, querys)
-        LOGGER.debug('results: {}'.format(results))
-        return islice(self._merge(results), limit)
-
+        limited_scan = partial(self._scan, limit = limit * 15)
+        from futures import ThreadPoolExecutor, ProcessPoolExecutor
+        with ThreadPoolExecutor(max_workers=20) as e:
+            results = list(e.map(limited_scan, querys))
+            # results =  map (limited_scan, querys)
+            # LOGGER.debug('results: {}'.format(results))
+        return list(islice(self._merge(results), limit))
+    
 
 
 if __name__ == '__main__':
