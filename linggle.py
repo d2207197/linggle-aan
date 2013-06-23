@@ -8,7 +8,6 @@ from flask import Flask, g, render_template, Response, json
 from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
 from urllib import unquote
-from hbasengram import HBaseNgram
 # from contextlib import closing
 
 # our own
@@ -455,6 +454,7 @@ def query(query):
             #                  for data in Search_Result[:TRADITIONAL_RESULT_LIMIT]]
 
 
+    from hbasengram import HBaseNgram
 
     hbn = HBaseNgram('ec2-50-112-200-196.us-west-2.compute.amazonaws.com', 'web1t')
 
