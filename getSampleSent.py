@@ -1,4 +1,4 @@
-#-*- coding: utf8 -*-
+#-*- coding: utf-8 -*-
 #!/usr/bin/python
 '''
 Created on 2013/04/24
@@ -8,16 +8,19 @@ Created on 2013/04/24
 ####==================================================
 ####    從 DB 中取得 ngram 的例句
 ####==================================================
-import sqlite3 as sqlite
+# import sqlite3 as sqlite
 from time import ctime
-import sys
 
 
 ##==================================================
 ##   從 DB 中取得 ngram 的例句
 ##==================================================
 print ctime()
+
+import nltk
+nltk.data.path.append('./nltk_data/')
 from nltk.corpus import stopwords
+
 # conn = sqlite.connect("/corpus/Linggle/LinggleSamples.db3")
 # cursor = conn.cursor()
 Corpus_List = ["BNC","NYT"]
