@@ -1,14 +1,14 @@
 // DATA
 var EXAMPLE = {
     "CMD": [
-        "$A beach <span>cluster</span>", 
-        "cultivate $N <span>cluster</span>",
-        "$V an important $N", 
+        "adj. beach <span>cluster</span>", 
+        "cultivate n. <span>cluster</span>",
+        "v. an important n.", 
 
         // "take $D ... trip", 
         "go ?to home", 
         
-        "play $D +important role|part"
+        "play det. +important role|part"
     ],
     "HLI": [
         "How to describe beach?", 
@@ -23,12 +23,12 @@ var EXAMPLE = {
 };
 var HELP = {
     "CMD": [
-        {"<span>*</span>"           :   "search for <span>any</span> word"},
-        {"<span>+</span><m>Term</m>":   "search for the <span>similar</span> words of <m>Term</m>"},
+        {"<span>_</span>"           :   "search for <span>any</span> word"},
+        {"<span>~</span><m>Term</m>":   "search for the <span>similar</span> words of <m>Term</m>"},
         {"<span>?</span><m>Term</m>":   "search for <m>Term</m> <span>optionally</span>"},
-        {"<span>...</span>"         :   "match <span>one or more</span> words"},
+        {"<span>*</span>"         :   "match <span>one or more</span> words"},
         {"Term1<span>|</span>Term2" :   "with either Term1 <span>or</span> Term2"},
-        {"$<span>POS</span>"        :   "search for word with specific part-of-speech.<br><br><span>$V</span>(verb), <span>$N</span>(noun), <span>$A</span>(adjective), <span>$R</span>(adverb) and <span>$PP</span>(preposition), <span>$D</span>(determiner)"},
+        {"$<span>POS</span>"        :   "search for word with specific part-of-speech.<br><br><span>v.</span>(verb), <span>n.</span>(noun), <span>adj.</span>(adjective), <span>adv.</span>(adverb) and <span>prep.</span>(preposition), <span>det.</span>(determiner)"},
     ],
     "HLI": [
         {"<span>Which</span>"       :   "Which ____ is ____, <span>item A</span> or <span>item B</span>"},

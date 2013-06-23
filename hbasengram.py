@@ -147,7 +147,7 @@ class Query():
                 LOGGER.debug('-> maybe')
                 self._maybe = True
                 continue
-            elif gram in ['v.', 'adj.', 'n.', 'adv.']:
+            elif gram in ['v.', 'adj.', 'n.', 'adv.', 'det.', 'prep.']:
                 LOGGER.debug('-> POS')
                 self._insert_POS(gram)
             elif gram == 'STOPHERE':
@@ -267,7 +267,7 @@ def queryparser():
     linggle query syntax -> hbase query'''
     word = Word(alphas + "'" + '.' + ',' + '.' + '<>')
     wildcard, any_wildcard, maybe = Literal('_'), Literal('*'), Literal('?')
-    POS = (Literal('adj.')| Literal('n.')|Literal('v.')|Literal('adv.'))
+    POS = (Literal('adj.')| Literal('n.')|Literal('v.')|Literal('adv.')| Literal('det.')| Literal('prep.'))
     atom = (word | wildcard | any_wildcard | maybe | POS)
     
 
@@ -404,7 +404,7 @@ class HBaseNgram:
             POSs = map(itemgetter(1), filter ( lambda x: x[2]> 0.3  ,bncwordlemma[word]))
         except KeyError:
             return False
-        trans = {'adj.': 'a', 'adv.': 'r', 'v.': 'v', 'n.': 'n'}
+        trans = {'adj.': 'a', 'adv.': 'r', 'v.': 'v', 'n.': 'n', 'det.': 'd', 'prep.': 'p'}
         # print POSs, word, flt, row
 
         if trans[flt[1]] in POSs:
