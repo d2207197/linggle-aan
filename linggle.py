@@ -3,13 +3,12 @@
 
 import sqlite3
 import os
-import pickle
 import logging
 from flask import Flask, g, render_template, Response, json
 from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
 from urllib import unquote
-from contextlib import closing
+# from contextlib import closing
 
 # our own
 import getSampleSent
@@ -462,8 +461,11 @@ def query(query):
     # 初步產生 Return_Result
     Return_Result = []
     count_sum = 0
+
+    import cgi
     for row in hbn.query(query, limit = TRADITIONAL_RESULT_LIMIT):
         count_sum += row.count
+        row.ngram = [ i in row.positions and '<strong>{}</strong>'.format(cgi.escape(word)) or cgi.escape(word)  for i, word in enumerate(row.ngram) ]
         Return_Result.append({"phrase": ' '.join(row.ngram), "count": row.count,
                               "count_str": '{:,d}'.format(row.count)})
     
@@ -472,7 +474,6 @@ def query(query):
         row['percent'] = ' {:2.0f} %'.format( 100* row['count'] / float(count_sum))
 
         
-    print Return_Result
         
 
     ## 進行統計跟格式的refinement

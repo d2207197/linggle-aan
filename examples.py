@@ -1,4 +1,4 @@
-import pickle
+# import pickle
 import v4
 import noun_forms
 import vf_to_vb

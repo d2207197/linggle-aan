@@ -3,7 +3,6 @@
 # import sqlite3 as sqlite
 # import re,json
 # from nltk import pos_tag
-# import pickle,socket
 # import datetime
 from flask import Response
 

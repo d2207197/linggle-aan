@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from time import ctime
 import socket,sqlite3
-import pickle,os
+# import pickle,os
+import os
 
 CLUSTER_ROOT = ['/corpus/Linggle/', '']
 ##=============cluster data loading===================
