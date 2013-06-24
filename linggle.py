@@ -456,7 +456,7 @@ def query(query):
 
     from hbasengram import HBaseNgram
 
-    hbn = HBaseNgram('ec2-50-112-200-196.us-west-2.compute.amazonaws.com', 'web1t')
+    hbn = HBaseNgram('ec2-54-245-209-43.us-west-2.compute.amazonaws.com', 'web1t')
 
     # 初步產生 Return_Result
     Return_Result = []
