@@ -349,6 +349,7 @@ class HBaseNgram:
         """
         self.host = host
         self.table = table
+        self.pool = happybase.ConnectionPool(size=20, host=host)
         # conn = happybase.Connection(host)
         # conn.open()
         # self._table = conn.table(table)
@@ -412,16 +413,18 @@ class HBaseNgram:
         return False
 
     def _scan(self, query, limit):
-        conn = happybase.Connection(self.host)
-        conn.open()
-        print 'scanning: {} {}'.format(query.rowkey(), query.column())
-        # return self._table.scan(
+        with self.pool.connection() as conn:
 
-        rows = list(conn.table(self.table).scan(
-            row_prefix=query.rowkey(),
-            columns=[query.column()],
-            limit=limit ))
-        print 'scanned: {} {}'.format(query.rowkey(), query.column())
+            # conn = happybase.Connection(self.host)
+            # conn.open()
+            print 'scanning: {} {}'.format(query.rowkey(), query.column())
+            # return self._table.scan(
+
+            rows = list(conn.table(self.table).scan(
+                row_prefix=query.rowkey(),
+                columns=[query.column()],
+                limit=limit ))
+            print 'scanned: {} {}'.format(query.rowkey(), query.column())
 
         return rows, query.filters
 
@@ -460,13 +463,20 @@ class HBaseNgram:
         query += ' STOPHERE'
         querys = parser.parseString(query)[0]
         LOGGER.debug('querys: {}'.format(querys))
-        limited_scan = partial(self._scan, limit = limit * 15)
-        from futures import ThreadPoolExecutor, ProcessPoolExecutor
+        from itertools import imap
+        from operator import attrgetter
+        if any(imap(len, imap(attrgetter('filters'), querys))):
+            limit_timse = 15
+        else:
+            limit_timse = 1
+
+        limited_scan = partial(self._scan, limit = limit * limit_timse)
+        from futures import ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=20) as e:
-            results = list(e.map(limited_scan, querys))
+            results = e.map(limited_scan, querys)
             # results =  map (limited_scan, querys)
             # LOGGER.debug('results: {}'.format(results))
-        return list(islice(self._merge(results), limit))
+            return list(islice(self._merge(results), limit))
     
 
 

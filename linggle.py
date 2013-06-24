@@ -313,7 +313,7 @@ def APIquery(query):
 def query(query):
 
     CLUSTER_RESULT_LIMIT = 300
-    TRADITIONAL_RESULT_LIMIT = 200
+    TRADITIONAL_RESULT_LIMIT = 100
 
     query_in = query
 
