@@ -417,14 +417,15 @@ class HBaseNgram:
 
             # conn = happybase.Connection(self.host)
             # conn.open()
-            print 'scanning: {} {}'.format(query.rowkey(), query.column())
+            # print 'scanning: {} {}'.format(query.rowkey(), query.column())
             # return self._table.scan(
 
-            rows = list(conn.table(self.table).scan(
+            rows = conn.table(self.table).scan(
                 row_prefix=query.rowkey(),
                 columns=[query.column()],
-                limit=limit ))
-            print 'scanned: {} {}'.format(query.rowkey(), query.column())
+                limit=limit,
+		batch_size=limit )
+            #print 'scanned: {} {}'.format(query.rowkey(), query.column())
 
         return rows, query.filters
 
