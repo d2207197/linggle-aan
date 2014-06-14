@@ -7,6 +7,7 @@ import logging
 from flask import Flask, g, render_template, Response, json
 from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
+from monggle import Monggle
 from urllib import unquote
 # from contextlib import closing
 
@@ -313,7 +314,7 @@ def APIquery(query):
 def query(query):
 
     CLUSTER_RESULT_LIMIT = 300
-    TRADITIONAL_RESULT_LIMIT = 100
+    TRADITIONAL_RESULT_LIMIT = 50
 
     query_in = query
 
@@ -454,18 +455,21 @@ def query(query):
             #                  for data in Search_Result[:TRADITIONAL_RESULT_LIMIT]]
 
 
-    from hbasengram import HBaseNgram
 
-    hbn = HBaseNgram('ec2-54-245-209-43.us-west-2.compute.amazonaws.com', 'web1t')
+    # hbn = HBaseNgram('ec2-54-245-209-43.us-west-2.compute.amazonaws.com', 'web1t')
+    mgl = Monggle('lost.nlpweb.org', 'ngrams', 'AAN2013', None, None, None)
 
     # 初步產生 Return_Result
     Return_Result = []
     count_sum = 0
 
     import cgi
-    for row in hbn.query(query, limit = TRADITIONAL_RESULT_LIMIT):
+    for row in mgl.query(query, limit= TRADITIONAL_RESULT_LIMIT):
         count_sum += row.count
-        row.ngram = [ i in row.positions and '<strong>{}</strong>'.format(cgi.escape(word)) or cgi.escape(word)  for i, word in enumerate(row.ngram) ]
+        print row, row.ngram, row.positions
+        # for i, word in enumerate(row):
+            # i in row
+        row.ngram = [ str(i) in row.positions and '<strong>{}</strong>'.format(cgi.escape(word)) or cgi.escape(word)  for i, word in enumerate(row.ngram) ]
         Return_Result.append({"phrase": ' '.join(row.ngram), "count": row.count,
                               "count_str": '{:,d}'.format(row.count)})
     
